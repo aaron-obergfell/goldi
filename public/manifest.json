@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Goldi",
+  "name": "Goldi - almost excellent",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +20,24 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#31aeaa",
+  "background_color": "#ffe6d5",
+  "file_handlers": [
+    {
+      "action": "index.html",
+      "accept": {
+        "text/plain": [
+          ".gol"
+        ]
+      },
+      "icons": [
+        {
+          "src": "logo192.png",
+          "type": "image/png",
+          "sizes": "192x192"
+        }
+      ],
+      "launch_type": "single-client"
+    }
+  ]
 }
