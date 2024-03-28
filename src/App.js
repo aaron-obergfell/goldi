@@ -1,6 +1,9 @@
 import logo from './logo.png';
 import './App.css';
 import React, { useState, useEffect } from 'react';
+import Button from 'react-bootstrap/Button';
+import Stack from 'react-bootstrap/Stack';
+import Accordion from 'react-bootstrap/Accordion';
 
 import { chooseAFile, openFileOnLaunch } from './file-management/open';
 
@@ -22,7 +25,9 @@ function App() {
     document.title = fileName;
     return (
       <div>
-        <button onClick={() => {setProjectId(null); getAll();}}>Overview</button>
+        <Button onClick={() => { setProjectId(null); getAll(); }} variant="info" size="lg">
+          Overview
+        </Button>
         <h1>{fileName}</h1>
         <p>
           {fileContent}
@@ -33,14 +38,18 @@ function App() {
   document.title = "Open | New | Recent";
   return (
     <div className="App">
-      {recent.map(r => {
+      <Stack gap={3}>{recent.map(r => {
         let permission = r.permissionState;
-        if (permission == 'granted') {
-          return(<button onClick={() => setProjectId(r.id)}>{r.fileHandle.name}</button>)
-        }
+        return (
+          <Button onClick={() => setProjectId(r.id)} variant="secondary" size="lg" disabled={permission != 'granted'}>
+            {r.fileHandle.name}
+          </Button>)
       })
       }
-      <button onClick={() => chooseAFile(setProjectId)}>Open</button>
+      </Stack>
+      <Button onClick={() => chooseAFile(setProjectId)} variant="info">
+            Open
+          </Button>
     </div>
   );
 
