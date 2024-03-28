@@ -1,23 +1,36 @@
-import logo from './logo.png';
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Stack from 'react-bootstrap/Stack';
-import Accordion from 'react-bootstrap/Accordion';
 
 import { chooseAFile, openFileOnLaunch } from './file-management/open';
 
+declare global {
+  interface Window { launchQueue: any; }
+  interface LaunchParams {
+    readonly files: FileSystemFileHandle[];
+  }
+}
+
 function App() {
 
-  const [projectId, setProjectId] = useState(null);
-  const [fileName, setFileName] = useState(null);
-  const [fileContent, setFileContent] = useState(null);
-  const [recent, setRecent] = useState([]);
+  type FileWithMeta = {
+    id: string,
+    fileHandle: FileSystemFileHandle,
+    permissionState: PermissionStatus
+  }
+
+  const [projectId, setProjectId] = useState<string | undefined>(undefined);
+  const [fileName, setFileName] = useState<string>("");
+  const [fileContent, setFileContent] = useState<string>("");
+  const [recent, setRecent] = useState<FileWithMeta[]>([]);
   useEffect(() => {
-    window.launchQueue.setConsumer((launchParams) => {
-      openFileOnLaunch(launchParams, setProjectId);
-    });
-    getAll();
+    if ('launchQueue' in window) {
+      window.launchQueue.setConsumer((launchParams: LaunchParams) => {
+        openFileOnLaunch(launchParams, setProjectId);
+      });
+      getAll();
+    }
   }, []);
 
   if (projectId) {
@@ -25,7 +38,7 @@ function App() {
     document.title = fileName;
     return (
       <div>
-        <Button onClick={() => { setProjectId(null); getAll(); }} variant="info" size="lg">
+        <Button onClick={() => { setProjectId(undefined); getAll(); }} variant="info" size="lg">
           Overview
         </Button>
         <h1>{fileName}</h1>
@@ -39,17 +52,16 @@ function App() {
   return (
     <div className="App">
       <Stack gap={3}>{recent.map(r => {
-        let permission = r.permissionState;
         return (
-          <Button onClick={() => setProjectId(r.id)} variant="secondary" size="lg" disabled={permission != 'granted'}>
+          <Button onClick={() => setProjectId(r.id)} variant="secondary" size="lg" disabled={r.permissionState.name !== 'granted'}>
             {r.fileHandle.name}
           </Button>)
       })
       }
       </Stack>
       <Button onClick={() => chooseAFile(setProjectId)} variant="info">
-            Open
-          </Button>
+        Open
+      </Button>
     </div>
   );
 
