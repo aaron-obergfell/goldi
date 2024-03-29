@@ -1,3 +1,5 @@
+import { appDataRepository } from '../db/appData.ts';
+
 export async function openFileOnLaunch(launchParams, setProjectId) {
   if (launchParams.files.length) {
     let fileHandle = await launchParams.files[0];
@@ -30,35 +32,24 @@ export async function chooseAFile(setProjectId) {
 }
 
 async function addToDB(fileHandle, setProjectId) {
-
-  const file = await fileHandle.getFile();
-  // This works on all devices/browsers, and uses IndexedDBShim as a final fallback 
-  var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
-
-  // Open (or create) the database
-  var open = indexedDB.open("AppData", 1);
-
-  // Create the schema
-  open.onupgradeneeded = function () {
-    var db = open.result;
-    db.createObjectStore("FileHandlers", { keyPath: "id" });
-  };
-
+  let allProjects = await appDataRepository.projects.toArray();
+  for (let i = 0; i < allProjects.length; i++) {
+    let same = await fileHandle.isSameEntry(allProjects[i].fileHandle);
+    if (same) {
+      console.log("FileHandle was already in db with id " + allProjects[i].id);
+      setProjectId(allProjects[i].id);
+      return;
+    }
+  }
   const id = crypto.randomUUID();
-  open.onsuccess = async function () {
-    // Start a new transaction
-    var db = open.result;
-    var tx = db.transaction("FileHandlers", "readwrite");
-    var store = tx.objectStore("FileHandlers");
-
-    // Add some data
-    store.put({ id: id, fileHandle: fileHandle });
-    const file = await fileHandle.getFile();
-
+  console.log("FileHandle needs to be added to db. Will use new id " + id);
+  try {
+    await appDataRepository.projects.add({
+      id: id,
+      fileHandle: fileHandle
+    });
     setProjectId(id);
-    // Close the db when the transaction is done
-    tx.oncomplete = function () {
-      db.close();
-    };
+  } catch (error) {
+    alert(`Failed to add ${fileHandle.name}: ${error}`);
   }
 }
