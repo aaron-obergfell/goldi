@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from 'react-bootstrap';
 import {  appDataRepository } from '../db/appData.ts';
+import { GoldiData, GoldiJSON, GoldiMeta } from '../types/goldi.js';
 
 type ActiveGoldiProps = {
   projectId: string;
@@ -9,12 +10,11 @@ type ActiveGoldiProps = {
 
 export default function ActiveGoldi(props: ActiveGoldiProps) {
 
-  const [fileName, setFileName] = useState<string>("");
-  const [fileContent, setFileContent] = useState<string>("");
+  const [goldiMeta, setGoldiMeta] = useState<GoldiMeta | undefined>(undefined);
 
   useEffect(() => {
-    getFile(props.projectId);
-    document.title = fileName;
+    loadFile(props.projectId);
+    if (goldiMeta) document.title = goldiMeta.title;
   });
 
   return (
@@ -22,19 +22,25 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
       <Button onClick={props.onClose} variant="info" size="lg">
         X
       </Button>
-      <h1>{fileName}</h1>
+      <h1>{goldiMeta?.title}</h1>
+      <div style={{
+        backgroundColor: goldiMeta?.color,
+        width: 600,
+        height: 30,
+      }}>
+      </div>
       <p>
-        {fileContent}
+        {goldiMeta?.description}
       </p>
     </div>
   );
 
-  async function getFile(id) {
+  async function loadFile(id) {
     const project = await appDataRepository.projects.get(id);
     if (project) {
-      let f = await project.fileHandle.getFile();
-      setFileName(f.name);
-      setFileContent(await f.text());
+      let file = await project.fileHandle.getFile();
+      let goldiJson: GoldiJSON = JSON.parse(await file.text());
+      setGoldiMeta(goldiJson.meta);
     } else {
       alert("Fehler")
     }
