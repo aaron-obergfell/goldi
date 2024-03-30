@@ -1,6 +1,6 @@
 export type GoldiMeta = {
     title: string;
-    description:  string;
+    description: string;
     color: string;
 };
 

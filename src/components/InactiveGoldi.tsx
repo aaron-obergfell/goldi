@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Stack } from 'react-bootstrap';
 
-import { chooseAFile } from '../file-management/open';
+import { chooseAFile } from '../fs/open';
 import { appDataRepository } from '../db/appData.ts';
 
 type InactiveGoldiProps = {
@@ -41,8 +41,12 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
       {
         files.map((file) => {
           return (
-            <p>
-              <Button onClick={() => props.open(file.id)} variant="danger" className="my-3" disabled={file.permissionState as unknown as string !== "granted"}>
+            <p key={file.id}>
+              <Button
+                onClick={() => props.open(file.id)}
+                variant="danger"
+                className="my-3"
+                disabled={file.permissionState as unknown as string !== "granted"}>
                 {file.fileHandle.name}
               </Button>
             </p>)
