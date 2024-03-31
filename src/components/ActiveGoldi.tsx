@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from 'react-bootstrap';
-import { appDataRepository } from '../db/appData.ts';
-import { GoldiJSON, GoldiMeta } from '../types/goldi.ts';
-import GoldiView from './GoldiView.tsx';
-import GoldiEditMeta from './GoldiEditMeta.tsx';
-import { onBeforeUnload } from '../window/onbeforeunload.ts';
+import { appDataRepository } from '../db/appData';
+import { GoldiJSON, GoldiMeta } from '../types/goldi';
+import GoldiView from './GoldiView';
+import GoldiEditMeta from './GoldiEditMeta';
+import { onBeforeUnload } from '../window/onbeforeunload';
+import EditColumns from './EditColumns';
+import { getWritable } from '../fs/fileHandleHelper';
 
 type ActiveGoldiProps = {
   projectId: string;
@@ -13,14 +15,15 @@ type ActiveGoldiProps = {
 
 enum GoldiMode {
   View = "VIEW",
-  EditMeta = "EDIT_META"
+  EditMeta = "EDIT_META",
+  EditColumns = "EDIT_COLUMNS"
 }
 
 export default function ActiveGoldi(props: ActiveGoldiProps) {
 
   const [goldiMeta, setGoldiMeta] = useState<GoldiMeta | undefined>(undefined);
   const [goldiMode, setGoldiMode] = useState<GoldiMode>(GoldiMode.View);
-  const [saveNeeded, toggleSaveNeeded] = useState<boolean >(false);
+  const [saveNeeded, toggleSaveNeeded] = useState<boolean>(false);
 
   useEffect(() => {
     loadFile(props.projectId);
@@ -53,6 +56,10 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
         Edit Meta
       </Button>
       ------
+      <Button onClick={() => setGoldiMode(GoldiMode.EditColumns)} variant="info" disabled={goldiMode === GoldiMode.EditMeta}>
+        Edit Columns
+      </Button>
+      ------
       <Button onClick={props.onClose} variant="info" disabled={saveNeeded}>
         X
       </Button>
@@ -66,6 +73,17 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
             setGoldiMode(GoldiMode.View);
             setGoldiMeta(updatedGoldiMeta);
             toggleSaveNeeded(true);
+          }}
+        />
+      }
+      {(goldiMeta && (goldiMode === GoldiMode.EditColumns)) &&
+        <EditColumns
+          projectId={props.projectId}
+          onUpdate={() => {
+            toggleSaveNeeded(true);
+          }}
+          onDone={() => {
+            setGoldiMode(GoldiMode.View);
           }}
         />
       }
@@ -86,10 +104,10 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
 
   async function save(id: string): Promise<void> {
     const project = await appDataRepository.projects.get(id);
-    if (project && goldiMeta  ) {
+    if (project && goldiMeta) {
       const fileHandle = await project.fileHandle;
-      const writable = await fileHandle.createWritable();
-      const goldiJson: GoldiJSON = {meta: goldiMeta, data: "ABC"}
+      const writable = await getWritable(fileHandle);
+      const goldiJson: GoldiJSON = { meta: goldiMeta, data: "ABC" }
       await writable.write(JSON.stringify(goldiJson, null, 2));
       // Close the file and write the contents to disk.
       await writable.close();

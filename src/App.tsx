@@ -2,8 +2,8 @@ import './App.css';
 import React, { useState, useEffect } from 'react';
 
 import { openFileOnLaunch } from './fs/open';
-import ActiveGoldi from './components/ActiveGoldi.tsx';
-import InactiveGoldi from './components/InactiveGoldi.tsx';
+import ActiveGoldi from './components/ActiveGoldi';
+import InactiveGoldi from './components/InactiveGoldi';
 
 declare global {
   interface Window { launchQueue: any; }

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Button, Stack } from 'react-bootstrap';
 
 import { chooseAFile } from '../fs/open';
-import { appDataRepository } from '../db/appData.ts';
+import { appDataRepository } from '../db/appData';
+import { getPermission } from '../fs/fileHandleHelper';
 
 type InactiveGoldiProps = {
   open: (projectId: string) => void;
@@ -25,7 +26,7 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
         return {
           id: project.id,
           fileHandle: project.fileHandle,
-          permissionState: await project.fileHandle.queryPermission()
+          permissionState: await getPermission(project.fileHandle)
         }
       }));
       setFiles(files);

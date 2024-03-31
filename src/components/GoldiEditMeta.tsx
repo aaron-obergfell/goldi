@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { GoldiMeta } from '../types/goldi.js';
+import { GoldiMeta } from '../types/goldi';
 import Form from 'react-bootstrap/Form';
 
 type GoldiEditMetaProps = {
   currentGoldiMeta: GoldiMeta;
-  onUpdate: (updatedGoldiMeta) => void;
+  onUpdate: (updatedGoldiMeta: GoldiMeta) => void;
 }
 
 export default function GoldiEditMeta(props: GoldiEditMetaProps) {
