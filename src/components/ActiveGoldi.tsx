@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from 'react-bootstrap';
 import { appDataRepository } from '../db/appData';
-import { GoldiJSON, GoldiMeta } from '../types/goldi';
+import { GoldiData, GoldiJSON, GoldiMeta } from '../types/goldi';
 import GoldiView from './GoldiView';
 import GoldiEditMeta from './GoldiEditMeta';
 import { onBeforeUnload } from '../window/onbeforeunload';
 import EditColumns from './EditColumns';
 import { getWritable } from '../fs/fileHandleHelper';
+import { projectDataRepository } from '../db/projectData';
 
 type ActiveGoldiProps = {
   projectId: string;
@@ -27,7 +28,7 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
 
   useEffect(() => {
     loadFile(props.projectId);
-  }, []);
+  }, [props.projectId]);
 
   useEffect(() => {
     if (goldiMeta) document.title = goldiMeta.title;
@@ -91,15 +92,18 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
   );
 
   async function loadFile(id: string): Promise<void> {
-    const project = await appDataRepository.projects.get(id);
-    if (project) {
-      let file = await project.fileHandle.getFile();
-      let goldiJson: GoldiJSON = JSON.parse(await file.text());
-      setGoldiMeta(goldiJson.meta);
-      toggleSaveNeeded(false)
-    } else {
-      alert("Fehler")
-    }
+    projectDataRepository(id).delete().then(async () => {
+      const project = await appDataRepository.projects.get(id);
+      if (project) {
+        let file = await project.fileHandle.getFile();
+        let goldiJson: GoldiJSON = JSON.parse(await file.text());
+        setGoldiMeta(goldiJson.meta);
+        projectDataRepository(id).columns.bulkAdd(goldiJson.data.columns);
+        toggleSaveNeeded(false);
+      } else {
+        alert("Fehler")
+      }
+    });
   }
 
   async function save(id: string): Promise<void> {
@@ -107,7 +111,10 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
     if (project && goldiMeta) {
       const fileHandle = await project.fileHandle;
       const writable = await getWritable(fileHandle);
-      const goldiJson: GoldiJSON = { meta: goldiMeta, data: "ABC" }
+      const goldiData: GoldiData = {
+        columns: await projectDataRepository(props.projectId).columns.toArray()
+      }
+      const goldiJson: GoldiJSON = { meta: goldiMeta, data: goldiData }
       await writable.write(JSON.stringify(goldiJson, null, 2));
       // Close the file and write the contents to disk.
       await writable.close();

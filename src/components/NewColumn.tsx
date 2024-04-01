@@ -42,9 +42,9 @@ export default function NewColumn(props: NewColumnProps) {
           value={newType}
           onChange={e => setNewType(e.target.value as GoldiColumnType)}
         >
-          {Object.keys(GoldiColumnType).map(key => (
-            <option key={key} value={key}>
-              {key}
+          {Object.values(GoldiColumnType).map((value) => (
+            <option key={value} value={value}>
+              {value}
             </option>
           ))}
         </Form.Select>
