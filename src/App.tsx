@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { openFileOnLaunch } from './fs/open';
 import ActiveGoldi from './components/ActiveGoldi';
 import InactiveGoldi from './components/InactiveGoldi';
+import { Container } from 'react-bootstrap';
 
 declare global {
   interface Window { launchQueue: any; }
@@ -23,17 +24,17 @@ function App() {
       });
     }
   }, []);
-
-  if (projectId) {
-    return (
-      <ActiveGoldi
-        projectId={projectId}
-        onClose={() => setProjectId(undefined)}
-      />
-    );
-  }
   return (
-    <InactiveGoldi open={setProjectId} />
+    <Container>
+      {projectId ? (
+        <ActiveGoldi
+          projectId={projectId}
+          onClose={() => setProjectId(undefined)}
+        />
+      ) : (
+        <InactiveGoldi open={setProjectId} />
+      )}
+    </Container>
   );
 }
 

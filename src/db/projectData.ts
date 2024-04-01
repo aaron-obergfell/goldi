@@ -15,6 +15,8 @@ export type GoldiColumn = {
     id?: number;
     name: string;
     type: GoldiColumnType;
+    position: number;
+    visible: boolean;
 }
 
 export class ProjectDataRepository extends Dexie {
@@ -23,7 +25,7 @@ export class ProjectDataRepository extends Dexie {
     constructor(dbName: string) {
         super(dbName);
         this.version(1).stores({
-            columns: '++id'
+            columns: '++id, position'
         });
     }
 }

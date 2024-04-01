@@ -1,5 +1,7 @@
+import { useLiveQuery } from 'dexie-react-hooks';
 import React, { useState, useEffect } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, Table } from 'react-bootstrap';
+import { projectDataRepository } from '../db/projectData';
 import { GoldiMeta } from '../types/goldi.js';
 
 type GoldiViewProps = {
@@ -8,6 +10,8 @@ type GoldiViewProps = {
 }
 
 export default function GoldiView(props: GoldiViewProps) {
+
+  const columns = useLiveQuery(() => projectDataRepository(props.projectId).columns.orderBy("position").filter(column => column.visible).toArray());
 
   return (
     <>
@@ -21,6 +25,43 @@ export default function GoldiView(props: GoldiViewProps) {
       <p>
         {props.goldiMeta.description}
       </p>
+      {
+        columns ? (
+          <Table responsive>
+            <thead>
+              <tr>
+                <th>#</th>
+                {columns.map((column) => (
+                  <th key={column.id}>{column.name}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                {Array.from({ length: columns.length }).map((_, index) => (
+                  <td key={index}>Table cell {index}</td>
+                ))}
+              </tr>
+              <tr>
+                <td>2</td>
+                {Array.from({ length: columns.length }).map((_, index) => (
+                  <td key={index}>Table cell {index}</td>
+                ))}
+              </tr>
+              <tr>
+                <td>3</td>
+                {Array.from({ length: columns.length }).map((_, index) => (
+                  <td key={index}>Table cell {index}</td>
+                ))}
+              </tr>
+            </tbody>
+          </Table>
+        ) : (
+          "loading"
+        )
+      }
+
     </>
   );
 }
