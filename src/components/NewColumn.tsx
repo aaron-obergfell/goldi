@@ -1,4 +1,3 @@
-import { useLiveQuery } from 'dexie-react-hooks';
 import React, { useState } from 'react';
 import { Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
@@ -17,7 +16,7 @@ export default function NewColumn(props: NewColumnProps) {
 
   async function addColumn() {
     try {
-      const id = await projectDataRepository(props.projectId).columns.add({
+      await projectDataRepository(props.projectId).columns.add({
         name: newName,
         type: newType
       });

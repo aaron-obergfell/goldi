@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from 'react-bootstrap';
 import { appDataRepository } from '../db/appData';
-import { GoldiData, GoldiJSON, GoldiMeta } from '../types/goldi';
+import { defaultMeta, GoldiData, GoldiJSON, GoldiMeta } from '../types/goldi';
 import GoldiView from './GoldiView';
 import GoldiEditMeta from './GoldiEditMeta';
 import { onBeforeUnload } from '../window/onbeforeunload';
 import EditColumns from './EditColumns';
-import { getWritable } from '../fs/fileHandleHelper';
+import { getFileHandleFromSavePicker, getWritable, saveOptions } from '../fs/fileHandleHelper';
 import { projectDataRepository } from '../db/projectData';
 
 type ActiveGoldiProps = {
@@ -94,12 +94,15 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
   async function loadFile(id: string): Promise<void> {
     projectDataRepository(id).delete().then(async () => {
       const project = await appDataRepository.projects.get(id);
-      if (project) {
+      if (project && project.fileHandle) {
         let file = await project.fileHandle.getFile();
         let goldiJson: GoldiJSON = JSON.parse(await file.text());
         setGoldiMeta(goldiJson.meta);
         projectDataRepository(id).columns.bulkAdd(goldiJson.data.columns);
         toggleSaveNeeded(false);
+      } else if (project) {
+        setGoldiMeta(defaultMeta);
+        toggleSaveNeeded(true);
       } else {
         alert("Fehler")
       }
@@ -108,8 +111,20 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
 
   async function save(id: string): Promise<void> {
     const project = await appDataRepository.projects.get(id);
-    if (project && goldiMeta) {
-      const fileHandle = await project.fileHandle;
+    if (project && goldiMeta && project.fileHandle) {
+      const fileHandle = project.fileHandle;
+      const writable = await getWritable(fileHandle);
+      const goldiData: GoldiData = {
+        columns: await projectDataRepository(props.projectId).columns.toArray()
+      }
+      const goldiJson: GoldiJSON = { meta: goldiMeta, data: goldiData }
+      await writable.write(JSON.stringify(goldiJson, null, 2));
+      // Close the file and write the contents to disk.
+      await writable.close();
+      toggleSaveNeeded(false);
+    } else if (project && goldiMeta) {
+      let fileHandle: FileSystemFileHandle = await getFileHandleFromSavePicker();
+      appDataRepository.projects.update(id, {"fileHandle": fileHandle});
       const writable = await getWritable(fileHandle);
       const goldiData: GoldiData = {
         columns: await projectDataRepository(props.projectId).columns.toArray()

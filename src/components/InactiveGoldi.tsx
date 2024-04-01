@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Stack } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 
-import { chooseAFile } from '../fs/open';
+import { chooseAFile, newProject } from '../fs/open';
 import { appDataRepository } from '../db/appData';
 import { getPermission } from '../fs/fileHandleHelper';
 
@@ -31,12 +31,16 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
       }));
       setFiles(files);
     });
-  }, []);
+  });
 
   return (
     <div className="App">
       <Button onClick={() => chooseAFile(props.open)} variant="info" className="my-3" >
         Open
+      </Button>
+      ---
+      <Button onClick={() => newProject(props.open)} variant="info" className="my-3" >
+        New
       </Button>
       <h3>Recent</h3>
       {
@@ -48,7 +52,7 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
                 variant="danger"
                 className="my-3"
                 disabled={file.permissionState as unknown as string !== "granted"}>
-                {file.fileHandle.name}
+                {file.fileHandle ? file.fileHandle.name : "ungespeicherte Arbeit"}
               </Button>
             </p>)
         })

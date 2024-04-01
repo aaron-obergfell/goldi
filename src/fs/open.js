@@ -31,10 +31,20 @@ export async function chooseAFile(setProjectId) {
   }
 }
 
+export async function newProject(setProjectId) {
+    addToDB(undefined, setProjectId);
+}
+
 async function addToDB(fileHandle, setProjectId) {
   let allProjects = await appDataRepository.projects.toArray();
   for (let i = 0; i < allProjects.length; i++) {
-    let same = await fileHandle.isSameEntry(allProjects[i].fileHandle);
+    let same;
+    if (fileHandle && allProjects[i].fileHandle) {
+      same = await fileHandle.isSameEntry(allProjects[i].fileHandle);
+    } else {
+      same = false;
+    }
+    
     if (same) {
       console.log("FileHandle was already in db with id " + allProjects[i].id);
       setProjectId(allProjects[i].id);
