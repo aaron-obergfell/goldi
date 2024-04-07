@@ -29,24 +29,8 @@ export default function GoldiView(props: GoldiViewProps) {
   const columns = useLiveQuery(() => db.columns.orderBy("position").filter(column => column.visible).toArray());
 
   useEffect(() => {
-    async function computeInMemoryItems(): Promise<void> {
-      if (!columns) {
-        return;
-      }
-      const allItems = await db.items.toArray();
-      let imi: InMemoryItem[] = [];
-      for (const item of allItems) {
-        const cells = await computeInMemoryCells(item);
-        imi.push({
-          item: item,
-          cells: cells
-        })
-      }
-      console.log(JSON.stringify(imi));
-      setInMemoryItems(imi);
-    }
     computeInMemoryItems();
-  }, [columns]);
+  }, [columns, computeInMemoryItems]);
 
   return (
     <>
@@ -85,7 +69,22 @@ export default function GoldiView(props: GoldiViewProps) {
     </>
   );
 
-  
+  async function computeInMemoryItems(): Promise<void> {
+    if (!columns) {
+      return;
+    }
+    const allItems = await db.items.toArray();
+    let imi: InMemoryItem[] = [];
+    for (const item of allItems) {
+      const cells = await computeInMemoryCells(item);
+      imi.push({
+        item: item,
+        cells: cells
+      })
+    }
+    console.log(JSON.stringify(imi));
+    setInMemoryItems(imi);
+  }
 
   async function computeInMemoryCells(item: GoldiItem): Promise<InMemoryCell[]> {
     const allValues = await db.values.toArray();
