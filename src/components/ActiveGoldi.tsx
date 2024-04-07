@@ -6,8 +6,9 @@ import GoldiView from './GoldiView';
 import GoldiEditMeta from './GoldiEditMeta';
 import { onBeforeUnload } from '../window/onbeforeunload';
 import EditColumns from './EditColumns';
-import { getFileHandleFromSavePicker, getWritable, saveOptions } from '../fs/fileHandleHelper';
+import { getFileHandleFromSavePicker, getWritable } from '../fs/fileHandleHelper';
 import { projectDataRepository } from '../db/projectData';
+import NewItemForm from './NewItemForm';
 
 type ActiveGoldiProps = {
   projectId: string;
@@ -17,7 +18,8 @@ type ActiveGoldiProps = {
 enum GoldiMode {
   View = "VIEW",
   EditMeta = "EDIT_META",
-  EditColumns = "EDIT_COLUMNS"
+  EditColumns = "EDIT_COLUMNS",
+  NewItem = "NEW_ITEM"
 }
 
 export default function ActiveGoldi(props: ActiveGoldiProps) {
@@ -45,7 +47,7 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
         Save
       </Button>
       ------
-      <Button onClick={() => loadFile(props.projectId)} variant="info">
+      <Button onClick={() => loadFile(props.projectId)} variant="info" disabled={!saveNeeded}>
         Reload from disc
       </Button>
       ------
@@ -53,11 +55,15 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
         View
       </Button>
       ------
-      <Button onClick={() => setGoldiMode(GoldiMode.EditMeta)} variant="info" disabled={goldiMode === GoldiMode.EditMeta}>
+      <Button onClick={() => setGoldiMode(GoldiMode.NewItem)} variant="info" disabled={goldiMode !== GoldiMode.View}>
+        New Item
+      </Button>
+      ------
+      <Button onClick={() => setGoldiMode(GoldiMode.EditMeta)} variant="info" disabled={goldiMode !== GoldiMode.View}>
         Edit Meta
       </Button>
       ------
-      <Button onClick={() => setGoldiMode(GoldiMode.EditColumns)} variant="info" disabled={goldiMode === GoldiMode.EditMeta}>
+      <Button onClick={() => setGoldiMode(GoldiMode.EditColumns)} variant="info" disabled={goldiMode !== GoldiMode.View}>
         Edit Columns
       </Button>
       ------
@@ -77,7 +83,7 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
           }}
         />
       }
-      {(goldiMeta && (goldiMode === GoldiMode.EditColumns)) &&
+      {(goldiMode === GoldiMode.EditColumns) &&
         <EditColumns
           projectId={props.projectId}
           onUpdate={() => {
@@ -86,6 +92,12 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
           onDone={() => {
             setGoldiMode(GoldiMode.View);
           }}
+        />
+      }
+      {(goldiMode === GoldiMode.NewItem) &&
+        <NewItemForm
+          projectId={props.projectId}
+          onLeave={() => setGoldiMode(GoldiMode.View)}
         />
       }
     </div>
@@ -98,7 +110,14 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
         let file = await project.fileHandle.getFile();
         let goldiJson: GoldiJSON = JSON.parse(await file.text());
         setGoldiMeta(goldiJson.meta);
-        projectDataRepository(id).columns.bulkAdd(goldiJson.data.columns);
+        const db = projectDataRepository(id);
+        db.columns.bulkAdd(goldiJson.data.columns);
+        db.values.bulkAdd(goldiJson.data.values);
+        db.items.bulkAdd(goldiJson.data.items);
+        db.images.bulkAdd(goldiJson.data.images);
+        db.itemToImageMappings.bulkAdd(goldiJson.data.itemToImageMappings);
+        db.itemToValueMappings.bulkAdd(goldiJson.data.itemToValueMappings);
+        db.itemToValueAssignments.bulkAdd(goldiJson.data.itemToValueAssignments);
         toggleSaveNeeded(false);
       } else if (project) {
         setGoldiMeta(defaultMeta);
@@ -114,8 +133,15 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
     if (project && goldiMeta && project.fileHandle) {
       const fileHandle = project.fileHandle;
       const writable = await getWritable(fileHandle);
+      const db = projectDataRepository(props.projectId);
       const goldiData: GoldiData = {
-        columns: await projectDataRepository(props.projectId).columns.toArray()
+        columns: await db.columns.toArray(),
+        values: await db.values.toArray(),
+        items: await db.items.toArray(),
+        images: await db.images.toArray(),
+        itemToImageMappings: await db.itemToImageMappings.toArray(),
+        itemToValueMappings: await db.itemToValueMappings.toArray(),
+        itemToValueAssignments: await db.itemToValueAssignments.toArray()
       }
       const goldiJson: GoldiJSON = { meta: goldiMeta, data: goldiData }
       await writable.write(JSON.stringify(goldiJson, null, 2));
@@ -124,10 +150,17 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
       toggleSaveNeeded(false);
     } else if (project && goldiMeta) {
       let fileHandle: FileSystemFileHandle = await getFileHandleFromSavePicker();
-      appDataRepository.projects.update(id, {"fileHandle": fileHandle});
+      appDataRepository.projects.update(id, { "fileHandle": fileHandle });
       const writable = await getWritable(fileHandle);
+      const db = projectDataRepository(props.projectId);
       const goldiData: GoldiData = {
-        columns: await projectDataRepository(props.projectId).columns.toArray()
+        columns: await db.columns.toArray(),
+        values: await db.values.toArray(),
+        items: await db.items.toArray(),
+        images: await db.images.toArray(),
+        itemToImageMappings: await db.itemToImageMappings.toArray(),
+        itemToValueMappings: await db.itemToValueMappings.toArray(),
+        itemToValueAssignments: await db.itemToValueAssignments.toArray()
       }
       const goldiJson: GoldiJSON = { meta: goldiMeta, data: goldiData }
       await writable.write(JSON.stringify(goldiJson, null, 2));

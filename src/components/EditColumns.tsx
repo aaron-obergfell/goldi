@@ -29,6 +29,7 @@ export default function EditColumns(props: EditColumnsProps) {
             <th>Spalten-Name</th>
             <th>Spalten-Typ</th>
             <th>Spalten-Sichtbarkeit</th>
+            <th>Mögliche Werte</th>
             <th>Aktionen</th>
           </tr>
         </thead>

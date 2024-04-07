@@ -1,4 +1,4 @@
-import { GoldiColumn } from "../db/projectData";
+import { GoldiColumn, GoldiImage, GoldiItem, GoldiValue, ItemToImageMapping, ItemToValueAssignment, ItemToValueMapping } from "../db/projectData";
 
 export type GoldiMeta = {
     title: string;
@@ -8,6 +8,12 @@ export type GoldiMeta = {
 
 export type GoldiData = {
     columns: GoldiColumn[];
+    values: GoldiValue[];
+    items: GoldiItem[];
+    images: GoldiImage[];
+    itemToValueMappings: ItemToValueMapping[];
+    itemToImageMappings: ItemToImageMapping[];
+    itemToValueAssignments: ItemToValueAssignment[];
 };
 
 export type GoldiJSON = {
@@ -16,7 +22,7 @@ export type GoldiJSON = {
 }
 
 export const defaultMeta: GoldiMeta = {
-    title: "Neues Projekt - " + new Date().toJSON(),
+    title: "Neues Projekt",
     description: "Bitte ändern",
     color: "#000000"
 }

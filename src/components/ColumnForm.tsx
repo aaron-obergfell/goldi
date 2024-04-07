@@ -1,7 +1,8 @@
+import { useLiveQuery } from 'dexie-react-hooks';
 import React, { useState } from 'react';
 import { Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
-import { GoldiColumn, GoldiColumnType, projectDataRepository } from '../db/projectData';
+import { GoldiColumn, GoldiColumnType, GoldiValue, projectDataRepository } from '../db/projectData';
 
 type ColumnFormProps = {
   projectId: string;
@@ -15,6 +16,15 @@ export default function ColumnForm(props: ColumnFormProps) {
   const [name, setNewName] = useState<string>(props.goldiColumn ? props.goldiColumn.name : "");
   const [type, setNewType] = useState<GoldiColumnType>(props.goldiColumn ? props.goldiColumn.type : GoldiColumnType.Text);
   const [visible, toggleIsVisible] = useState<boolean>(props.goldiColumn ? props.goldiColumn.visible : true);
+  const [newValue, setNewValue] = useState<string>("");
+  const [userWantsToAddNewValue, setUserWantsToAddNewValue] = useState<boolean>(false);
+
+  const possibleValues: GoldiValue[] | undefined = useLiveQuery(() => {
+    if (props.goldiColumn && props.goldiColumn.id) {
+      return projectDataRepository(props.projectId).values.where({ columnId: props.goldiColumn?.id }).toArray()
+    }
+    return [];
+  });
 
   return (
     <tr>
@@ -55,6 +65,48 @@ export default function ColumnForm(props: ColumnFormProps) {
         </Form.Group>
       </td>
       <td>
+        {
+          (type === GoldiColumnType.Text) ? (
+            <span>Freitext</span>
+          ) : (
+            <>
+              {
+                props.goldiColumn ? (
+                <>
+                  <ul>
+                    {possibleValues?.map((goldiValue: GoldiValue) => (
+                      <li>{goldiValue.value}</li>
+                    ))}
+                  </ul>
+                  {
+                    userWantsToAddNewValue ? (
+                      <Form.Group>
+                        <Form.Label>Wert</Form.Label>
+                        <Form.Control
+                          type='text'
+                          value={newValue}
+                          onChange={e => setNewValue(e.target.value)}
+                        />
+                        <Button onClick={() => { setUserWantsToAddNewValue(false); addValue(); }} variant="info">
+                          Add
+                        </Button>
+                      </Form.Group>
+                    ) : (
+                      <Button onClick={() => { setUserWantsToAddNewValue(true); setNewValue(""); }} variant="info">
+                        New
+                      </Button>
+                    )
+                  }
+                </>
+                ) : (
+                  <span>Kann nach dem Speichern definiert werden</span>
+                )
+              }
+            </>
+          )
+        }
+      </td>
+      <td>
         <Button
           onClick={() => {
             if (props.goldiColumn) {
@@ -80,12 +132,24 @@ export default function ColumnForm(props: ColumnFormProps) {
 
   async function addColumn() {
     try {
-      const columnCount: number = await projectDataRepository(props.projectId).columns.count();
       await projectDataRepository(props.projectId).columns.add({
         name: name,
         type: type,
         visible: visible,
         position: await determineNewPosition()
+      });
+    } catch (error) {
+      console.error(`Failed to add ${name}: ${error}`);
+    }
+  }
+
+  async function addValue() {
+    try {
+      await projectDataRepository(props.projectId).values.add({
+        value: newValue,
+        color: "#000000",
+        bgColor: "#ffffff",
+        columnId: props.goldiColumn!.id!
       });
     } catch (error) {
       console.error(`Failed to add ${name}: ${error}`);

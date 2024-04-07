@@ -19,6 +19,7 @@ export const saveOptions = {
         description: "Custom",
         accept: {
             "text/plain": [".gol"]
-        }
+        },
+        suggestedName: "no_name.gol"
     }]
 };

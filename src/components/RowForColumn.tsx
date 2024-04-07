@@ -1,6 +1,7 @@
+import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { Button, ButtonGroup } from 'react-bootstrap';
-import { GoldiColumn, projectDataRepository } from '../db/projectData';
+import { GoldiColumn, GoldiColumnType, GoldiValue, projectDataRepository } from '../db/projectData';
 import ColumnForm from './ColumnForm';
 
 type RowForColumnProps = {
@@ -13,6 +14,9 @@ type RowForColumnProps = {
 export default function RowForColumn(props: RowForColumnProps) {
 
   const [userWantsToEditColumn, setUserWantsToAEditColumn] = useState<boolean>(false);
+  const possibleValues: GoldiValue[] | undefined = useLiveQuery(() => {
+    return projectDataRepository(props.projectId).values.where({ columnId: props.goldiColumn.id }).toArray()
+  });
 
   return (
     <>
@@ -28,7 +32,19 @@ export default function RowForColumn(props: RowForColumnProps) {
           <tr>
             <td>{props.goldiColumn.name}</td >
             <td>{props.goldiColumn.type}</td>
-            <td>{props.goldiColumn.visible ? "Yes" : "Noooo"}</td>
+            <td>{props.goldiColumn.visible ? "Yes" : "No"}</td>
+            <td>
+              <ul>
+                {
+                  props.goldiColumn.type === GoldiColumnType.List &&
+                  <>
+                    {possibleValues?.map((goldiValue: GoldiValue) => (
+                      <li>{goldiValue.value}</li>
+                    ))}
+                  </>
+                }
+              </ul>
+            </td>
             <td>
               <Button onClick={() => setUserWantsToAEditColumn(true)} variant="info" size="sm">
                 Edit
