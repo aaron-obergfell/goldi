@@ -1,9 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState, useEffect } from 'react';
 import { Table } from 'react-bootstrap';
-import { GoldiColumn, GoldiColumnType, GoldiItem, GoldiValue, ItemToValueAssignment, ProjectDataRepository, projectDataRepository } from '../db/projectData';
-import { GoldiMeta } from '../types/goldi.js';
-import RowForItem from './RowForItem';
+import { GoldiColumn, GoldiColumnType, GoldiItem, GoldiValue, ItemToValueAssignment, ProjectDataRepository, projectDataRepository } from '../../../db/projectData';
+import { GoldiMeta } from '../../../types/goldi.js';
+import RowForItem from '../edit/RowForItem';
 
 type GoldiViewProps = {
   projectId: string;
@@ -30,7 +30,7 @@ export default function GoldiView(props: GoldiViewProps) {
 
   useEffect(() => {
     computeInMemoryItems();
-  }, [columns, computeInMemoryItems]);
+  }, [columns]);
 
   return (
     <>
@@ -82,7 +82,6 @@ export default function GoldiView(props: GoldiViewProps) {
         cells: cells
       })
     }
-    console.log(JSON.stringify(imi));
     setInMemoryItems(imi);
   }
 
@@ -90,7 +89,6 @@ export default function GoldiView(props: GoldiViewProps) {
     const allValues = await db.values.toArray();
     const allValueIdsForItem = (await db.itemToValueMappings.where({itemId: item.id}).toArray()).map(itvm => itvm.valueId);
     const allValueAssignmentsForItem = await db.itemToValueAssignments.where({itemId: item.id}).toArray();
-    console.log(JSON.stringify(allValueIdsForItem));
     const imc: InMemoryCell[] = [];
     for (const column of columns!) {
       if(column.type === GoldiColumnType.List) {

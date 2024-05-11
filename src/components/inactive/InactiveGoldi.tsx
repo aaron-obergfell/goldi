@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 
-import { chooseAFile, newProject } from '../fs/open';
-import { appDataRepository } from '../db/appData';
-import { getPermission } from '../fs/fileHandleHelper';
+import { chooseAFile, newProject } from '../../fs/open';
+import { appDataRepository } from '../../db/appData';
+import { getPermission } from '../../fs/fileHandleHelper';
 
 type InactiveGoldiProps = {
   open: (projectId: string) => void;
@@ -34,7 +34,7 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
   });
 
   return (
-    <div className="App">
+    <Container>
       <Button onClick={() => chooseAFile(props.open)} variant="info" className="my-3" >
         Open
       </Button>
@@ -57,6 +57,6 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
             </p>)
         })
       }
-    </div>
+    </Container>
   );
 }

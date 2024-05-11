@@ -1,5 +1,5 @@
-import { GoldiColumn, GoldiColumnType, GoldiValue } from '../db/projectData';
-import { InMemoryItem } from './GoldiView';
+import { GoldiColumnType, GoldiValue } from '../../../db/projectData';
+import { InMemoryItem } from '../view/GoldiView';
 
 type RowForItemProps = {
   inMemoryItem: InMemoryItem;

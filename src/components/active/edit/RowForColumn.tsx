@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { Button, ButtonGroup } from 'react-bootstrap';
-import { GoldiColumn, GoldiColumnType, GoldiValue, projectDataRepository } from '../db/projectData';
+import { GoldiColumn, GoldiColumnType, GoldiValue, projectDataRepository } from '../../../db/projectData';
 import ColumnForm from './ColumnForm';
 
 type RowForColumnProps = {

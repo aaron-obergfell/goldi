@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { GoldiMeta } from '../types/goldi';
 import Form from 'react-bootstrap/Form';
+import { GoldiMeta } from '../../../types/goldi';
 
 type GoldiEditMetaProps = {
   currentGoldiMeta: GoldiMeta;

@@ -1,25 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from 'react-bootstrap';
-import { appDataRepository } from '../db/appData';
-import { defaultMeta, GoldiData, GoldiJSON, GoldiMeta } from '../types/goldi';
-import GoldiView from './GoldiView';
-import GoldiEditMeta from './GoldiEditMeta';
-import { onBeforeUnload } from '../window/onbeforeunload';
-import EditColumns from './EditColumns';
-import { getFileHandleFromSavePicker, getWritable } from '../fs/fileHandleHelper';
-import { projectDataRepository } from '../db/projectData';
-import NewItemForm from './NewItemForm';
+import { useState, useEffect } from 'react';
+import { appDataRepository } from '../../db/appData';
+import { defaultMeta, GoldiData, GoldiJSON, GoldiMeta } from '../../types/goldi';
+import GoldiView from './view/GoldiView';
+import { onBeforeUnload } from '../../window/onbeforeunload';
+import { getFileHandleFromSavePicker, getWritable } from '../../fs/fileHandleHelper';
+import { projectDataRepository } from '../../db/projectData';
+import GoldiEdit from './edit/GoldiEdit';
+import NavBarForActiveGoldi from './NavBarForActiveGoldi';
+import { Container } from 'react-bootstrap';
 
 type ActiveGoldiProps = {
   projectId: string;
   onClose: () => void;
 }
 
-enum GoldiMode {
-  View = "VIEW",
-  EditMeta = "EDIT_META",
-  EditColumns = "EDIT_COLUMNS",
-  NewItem = "NEW_ITEM"
+export enum GoldiMode {
+  View,
+  Edit
 }
 
 export default function ActiveGoldi(props: ActiveGoldiProps) {
@@ -42,65 +39,22 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
   });
 
   return (
-    <div>
-      <Button onClick={() => save(props.projectId)} variant="info" disabled={!saveNeeded}>
-        Save
-      </Button>
-      ------
-      <Button onClick={() => loadFile(props.projectId)} variant="info" disabled={!saveNeeded}>
-        Reload from disc
-      </Button>
-      ------
-      <Button onClick={() => setGoldiMode(GoldiMode.View)} variant="info" disabled={goldiMode === GoldiMode.View}>
-        View
-      </Button>
-      ------
-      <Button onClick={() => setGoldiMode(GoldiMode.NewItem)} variant="info" disabled={goldiMode !== GoldiMode.View}>
-        New Item
-      </Button>
-      ------
-      <Button onClick={() => setGoldiMode(GoldiMode.EditMeta)} variant="info" disabled={goldiMode !== GoldiMode.View}>
-        Edit Meta
-      </Button>
-      ------
-      <Button onClick={() => setGoldiMode(GoldiMode.EditColumns)} variant="info" disabled={goldiMode !== GoldiMode.View}>
-        Edit Columns
-      </Button>
-      ------
-      <Button onClick={props.onClose} variant="info" disabled={saveNeeded}>
-        X
-      </Button>
+    <Container fluid>
+      <NavBarForActiveGoldi
+        saveNeeded={saveNeeded}
+        projectId={props.projectId}
+        onClose={props.onClose}
+        setGoldiMode={setGoldiMode}
+        loadFile={loadFile}
+        save={save}
+      />
       {(goldiMeta && (goldiMode === GoldiMode.View)) &&
         <GoldiView projectId={props.projectId} goldiMeta={goldiMeta}></GoldiView>
       }
-      {(goldiMeta && (goldiMode === GoldiMode.EditMeta)) &&
-        <GoldiEditMeta
-          currentGoldiMeta={goldiMeta}
-          onUpdate={(updatedGoldiMeta: GoldiMeta) => {
-            setGoldiMode(GoldiMode.View);
-            setGoldiMeta(updatedGoldiMeta);
-            toggleSaveNeeded(true);
-          }}
-        />
+      {(goldiMeta && (goldiMode === GoldiMode.Edit)) &&
+        <GoldiEdit />
       }
-      {(goldiMode === GoldiMode.EditColumns) &&
-        <EditColumns
-          projectId={props.projectId}
-          onUpdate={() => {
-            toggleSaveNeeded(true);
-          }}
-          onDone={() => {
-            setGoldiMode(GoldiMode.View);
-          }}
-        />
-      }
-      {(goldiMode === GoldiMode.NewItem) &&
-        <NewItemForm
-          projectId={props.projectId}
-          onLeave={() => setGoldiMode(GoldiMode.View)}
-        />
-      }
-    </div>
+    </Container>
   );
 
   async function loadFile(id: string): Promise<void> {

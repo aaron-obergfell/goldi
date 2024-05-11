@@ -1,8 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import { Button, Form, Table } from "react-bootstrap";
-import { GoldiColumn, GoldiColumnType, GoldiItem, ItemToValueAssignment, ItemToValueMapping, ProjectDataRepository, projectDataRepository } from "../db/projectData";
-import RowForItem from "./RowForItem";
+import { GoldiColumn, GoldiColumnType, GoldiItem, ItemToValueAssignment, ItemToValueMapping, ProjectDataRepository, projectDataRepository } from "../../../db/projectData";
 
 type NewItemFormProps = {
   projectId: string;
