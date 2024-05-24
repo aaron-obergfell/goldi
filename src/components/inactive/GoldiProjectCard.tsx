@@ -1,7 +1,7 @@
 import { Button, Card, Col } from 'react-bootstrap';
 import Stack from 'react-bootstrap/Stack';
 
-import { appDataRepository, Project } from '../../db/appData';
+import { appDataRepository, Project, ProjectState } from '../../db/appData';
 import { projectDataRepository } from '../../db/projectData';
 import closeIcon from '../../icons/close.svg'
 import GoldiColorBar from '../globals/GoldiColorBar';
@@ -18,7 +18,7 @@ export default function GoldiProjectCard(props: GoldiProjectCardProps) {
       <Card>
         <Stack direction="horizontal" gap={3} className="mx-2">
           <span className="fst-italic fw-lighter">
-            {props.project.fileHandle ? props.project.fileHandle.name : "ungespeicherter Entwurf"}
+            {getFileReference()}
           </span>
           <div className="ms-auto">
             <SmallGoldiButton
@@ -53,5 +53,15 @@ export default function GoldiProjectCard(props: GoldiProjectCardProps) {
   async function remove(project: Project) {
     await projectDataRepository(project.id).delete();
     await appDataRepository.projects.delete(project.id);
+  }
+
+  function getFileReference(): string {
+    if (!props.project.fileHandle) {
+      return "unsaved draft";
+    }
+    if (props.project.state === ProjectState.AheadOfFile) {
+      return "*" + props.project.fileHandle.name;
+    }
+    return props.project.fileHandle.name;
   }
 }
