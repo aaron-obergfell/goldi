@@ -1,4 +1,5 @@
 import { appDataRepository } from '../db/appData.ts';
+import { defaultMeta } from '../types/goldi';
 
 export async function openFileOnLaunch(launchParams, setProjectId) {
   if (launchParams.files.length) {
@@ -7,7 +8,7 @@ export async function openFileOnLaunch(launchParams, setProjectId) {
   };
 }
 
-export async function chooseAFile(setProjectId) {
+export async function getFileHandleFromFilePicker() {
   if (!window.showOpenFilePicker) {
     alert("Your current device does not support the File System API. Try again on desktop Chrome!");
   }
@@ -25,9 +26,15 @@ export async function chooseAFile(setProjectId) {
     };
 
     // Open file picker and choose a file
-    let fileHandle = await window.showOpenFilePicker(options);
-    if (!fileHandle[0]) { return; }
-    addToDB(fileHandle[0], setProjectId);
+    try {
+      let fileHandle = await window.showOpenFilePicker(options);
+      if (fileHandle.length !== 1) {
+        return undefined;
+      }
+      return fileHandle[0];
+    } catch (err) {
+      return undefined;
+    }
   }
 }
 
@@ -56,7 +63,8 @@ async function addToDB(fileHandle, setProjectId) {
   try {
     await appDataRepository.projects.add({
       id: id,
-      fileHandle: fileHandle
+      fileHandle: fileHandle,
+      meta: defaultMeta
     });
     setProjectId(id);
   } catch (error) {

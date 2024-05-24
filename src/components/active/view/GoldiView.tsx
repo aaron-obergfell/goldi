@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Table } from 'react-bootstrap';
 import { GoldiColumn, GoldiColumnType, GoldiItem, GoldiValue, ItemToValueAssignment, ProjectDataRepository, projectDataRepository } from '../../../db/projectData';
 import { GoldiMeta } from '../../../types/goldi.js';
+import GoldiColorBar from '../../globals/GoldiColorBar';
 import RowForItem from '../edit/RowForItem';
 
 type GoldiViewProps = {
@@ -35,12 +36,7 @@ export default function GoldiView(props: GoldiViewProps) {
   return (
     <>
       <h1>{props.goldiMeta.title}</h1>
-      <div style={{
-        backgroundColor: props.goldiMeta.color,
-        width: '100%',
-        height: 5,
-      }}>
-      </div>
+      <GoldiColorBar color={props.goldiMeta.color} />
       <p>
         {props.goldiMeta.description}
       </p>

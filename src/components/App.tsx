@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import { openFileOnLaunch } from '../fs/open';
 import ActiveGoldi from './active/ActiveGoldi';
 import InactiveGoldi from './inactive/InactiveGoldi';
-import { Container } from 'react-bootstrap';
 
 declare global {
   interface Window { launchQueue: any; }
@@ -14,7 +13,7 @@ declare global {
 
 function App() {
 
-  const [projectId, setProjectId] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if ('launchQueue' in window) {
@@ -27,10 +26,10 @@ function App() {
   return projectId ? (
     <ActiveGoldi
       projectId={projectId}
-      onClose={() => setProjectId(null)}
+      onClose={() => setProjectId(undefined)}
     />
   ) : (
-    <InactiveGoldi open={setProjectId} />
+    <InactiveGoldi setProjectId={setProjectId} />
   );
 }
 
