@@ -1,14 +1,14 @@
 import { Container, Modal } from 'react-bootstrap';
 import ButtonWithTextInsideModal from '../../globals/ButtonWithTextInsideModal';
 
-type PermissionNotGrantedModalProps = {
+type OnOpenPermissionNotGrantedModalProps = {
   fileName: string | undefined;
   onRequestPermission: () => void;
   onCancel: () => void;
   onRemoveFileReference: () => void;
 }
 
-export default function PermissionNotGrantedModal(props: PermissionNotGrantedModalProps) {
+export default function OnOpenPermissionNotGrantedModal(props: OnOpenPermissionNotGrantedModalProps) {
 
   return (
     <Modal

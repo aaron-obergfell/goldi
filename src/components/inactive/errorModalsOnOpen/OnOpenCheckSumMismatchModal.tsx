@@ -1,7 +1,7 @@
 import { Container, Modal } from 'react-bootstrap';
 import ButtonWithTextInsideModal from '../../globals/ButtonWithTextInsideModal';
 
-type CheckSumMismatchModalProps = {
+type OnOpenCheckSumMismatchModalProps = {
   fileName: string | undefined;
   onOpenAsNew: () => void;
   onCancel: () => void;
@@ -9,7 +9,7 @@ type CheckSumMismatchModalProps = {
   onRemoveFileReference: () => void;
 }
 
-export default function CheckSumMismatchModal(props: CheckSumMismatchModalProps) {
+export default function OnOpenCheckSumMismatchModal(props: OnOpenCheckSumMismatchModalProps) {
 
   return (
     <Modal

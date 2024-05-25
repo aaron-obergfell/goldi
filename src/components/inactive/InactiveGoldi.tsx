@@ -6,11 +6,12 @@ import { requestReadWritePermission } from '../../fs/fileHandleHelper';
 import { getFileHandleFromFilePicker, newProject } from '../../fs/open';
 import { isProjectError, ProjectError, ProjectErrorType } from '../../logic/projectError';
 import { checkRecent, createNewProjectForFileHandle, getRecentProjectOrElseUndefined, prepare, removeFileReference } from '../../logic/projectService';
+import UnexpectedErrorModal from '../globals/UnexpectedErrorModal';
 import WaitingModal from '../globals/WaitingModal';
-import AheadOfFileModal from './errorModals/AheadOfFileModal';
-import CheckSumMismatchModal from './errorModals/CheckSumMismatchModal';
-import FileNotFoundModal from './errorModals/FileNotFoundModal';
-import PermissionNotGrantedModal from './errorModals/PermissionNotGrantedModal';
+import OnOpenAheadOfFileModal from './errorModalsOnOpen/OnOpenAheadOfFileModal';
+import OnOpenCheckSumMismatchModal from './errorModalsOnOpen/OnOpenCheckSumMismatchModal';
+import OnOpenFileNotFoundModal from './errorModalsOnOpen/OnOpenFileNotFoundModal';
+import OnOpenPermissionNotGrantedModal from './errorModalsOnOpen/OnOpenPermissionNotGrantedModal';
 import NavBarForInactiveGoldi from './NavBarForInactiveGoldi';
 import RecentProjects from './RecentProjects';
 
@@ -20,13 +21,19 @@ type InactiveGoldiProps = {
 
 export default function InactiveGoldi(props: InactiveGoldiProps) {
 
-  const [waitingText, setWaitingText] = useState<string | undefined>(undefined);
+  const [waiting, setWaiting] = useState<boolean>(false);
   const [projectError, setProjectError] = useState<ProjectError | undefined>(undefined);
   const [unexpectedErrorOccured, setUnexpectedErrorOccured] = useState<boolean>(false);
 
   useEffect(() => {
     document.title = "Goldi";
   });
+
+  useEffect(() => {
+    if (projectError || unexpectedErrorOccured) {
+      setWaiting(false);
+    }
+  }, [projectError, unexpectedErrorOccured]);
 
   return (
     <>
@@ -43,7 +50,7 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
         </div>
         <RecentProjects open={openRecentProject} />
       </Container>
-      <WaitingModal text={waitingText}></WaitingModal>
+      <WaitingModal show={waiting}/>
       {
         renderProblemModals()
       }
@@ -51,19 +58,20 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
   );
 
   function renderProblemModals(): JSX.Element {
+    if (unexpectedErrorOccured) {
+      return (
+        <UnexpectedErrorModal
+          show={unexpectedErrorOccured}
+          onHide={abort}
+        />
+      );
+    }    
     if (!projectError) {
       return (<></>);
     }
-    if (unexpectedErrorOccured) {
-      return (
-        <>
-          <div>We have an unexpected problem</div>
-        </>
-      );
-    }
     switch (projectError.type) {
       case ProjectErrorType.PermissionNotGranted: return (
-        <PermissionNotGrantedModal
+        <OnOpenPermissionNotGrantedModal
           fileName={projectError.project.fileHandle?.name}
           onRequestPermission={() => requestPermissionAndOpen(projectError.project)}
           onCancel={abort}
@@ -71,14 +79,14 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
         />
       )
       case ProjectErrorType.FileNotFound: return (
-        <FileNotFoundModal
+        <OnOpenFileNotFoundModal
           fileName={projectError.project.fileHandle?.name}
           onCancel={abort}
           onRemoveFileReference={() => removeFileRefAndOpen(projectError.project)}
         />
       )
       case ProjectErrorType.CheckSumMismatch: return (
-        <CheckSumMismatchModal
+        <OnOpenCheckSumMismatchModal
           fileName={projectError.project.fileHandle?.name}
           onCancel={abort}
           onOpenAsNew={() => openAsNew(projectError.project)}
@@ -87,7 +95,7 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
         />
       )
       case ProjectErrorType.AheadOfFile: return (
-        <AheadOfFileModal
+        <OnOpenAheadOfFileModal
           fileName={projectError.project.fileHandle?.name}
           onCancel={abort}
           onOpenAsNew={() => openAsNew(projectError.project)}
@@ -95,11 +103,12 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
           onContinue={() => props.setProjectId(projectError.project.id)}
         />
       )
+      default: return (<></>);
     }
-    return (<></>);
   }
 
   async function openRecentProject(project: Project): Promise<void> {
+    setWaiting(true);
     try {
       await checkRecent(project);
       props.setProjectId(project.id);
@@ -113,6 +122,7 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
   }
 
   async function openFromFilePicker(): Promise<void> {
+    setWaiting(true);
     const fileHandle: FileSystemFileHandle | undefined = await getFileHandleFromFilePicker();
     if (!fileHandle) {
       return;
@@ -136,6 +146,7 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
   }
 
   async function openAsNew(project: Project): Promise<void> {
+    setWaiting(true);
     if (!project.fileHandle) {
       setUnexpectedErrorOccured(true);
       return;
@@ -156,16 +167,19 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
   }
 
   async function removeFileRefAndOpen(project: Project): Promise<void> {
+    setWaiting(true);
     const updatedProject: Project = await removeFileReference(project);
     await openRecentProject(updatedProject);
   }
 
   async function requestPermissionAndOpen(project: Project): Promise<void> {
+    setWaiting(true);
     await requestReadWritePermission(project.fileHandle);
     await openRecentProject(project);
   }
 
   async function overwriteAndOpen(project: Project): Promise<void> {
+    setWaiting(true);
     try {
       await prepare(project);
       props.setProjectId(project.id);
@@ -175,6 +189,7 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
   }
 
   function abort(): void {
+    setWaiting(false);
     setProjectError(undefined);
     setUnexpectedErrorOccured(false);
     props.setProjectId(undefined);

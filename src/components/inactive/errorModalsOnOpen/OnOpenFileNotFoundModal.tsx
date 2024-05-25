@@ -1,13 +1,13 @@
 import { Container, Modal } from 'react-bootstrap';
 import ButtonWithTextInsideModal from '../../globals/ButtonWithTextInsideModal';
 
-type FileNotFoundModalProps = {
+type OnOpenFileNotFoundModalProps = {
   fileName: string | undefined;
   onCancel: () => void;
   onRemoveFileReference: () => void;
 }
 
-export default function FileNotFoundModal(props: FileNotFoundModalProps) {
+export default function OnOpenFileNotFoundModal(props: OnOpenFileNotFoundModalProps) {
 
   return (
     <Modal

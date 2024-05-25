@@ -1,7 +1,7 @@
 import { Container, Modal } from 'react-bootstrap';
 import ButtonWithTextInsideModal from '../../globals/ButtonWithTextInsideModal';
 
-type AheadOfFileModalProps = {
+type OnOpenAheadOfFileModalProps = {
   fileName: string | undefined;
   onOpenAsNew: () => void;
   onCancel: () => void;
@@ -9,7 +9,7 @@ type AheadOfFileModalProps = {
   onContinue: () => void;
 }
 
-export default function AheadOfFileModal(props: AheadOfFileModalProps) {
+export default function OnOpenAheadOfFileModal(props: OnOpenAheadOfFileModalProps) {
 
   return (
     <Modal
