@@ -8,12 +8,14 @@ import GoldiColorBar from '../globals/GoldiColorBar';
 import SmallGoldiButton from '../globals/SmallGoldiButton';
 type GoldiProjectCardProps = {
   project: Project;
-  open: (projectId: Project) => void;
+  onOpen: () => void;
+  onRemove: () => void;
 }
 
 export default function GoldiProjectCard(props: GoldiProjectCardProps) {
 
   return (
+    <>
     <Col xs={12} md={6} xxl={4} className={"py-1"} >
       <Card>
         <Stack direction="horizontal" gap={3} className="mx-2">
@@ -23,7 +25,7 @@ export default function GoldiProjectCard(props: GoldiProjectCardProps) {
           <div className="ms-auto">
             <SmallGoldiButton
               active={true}
-              onClick={() => remove(props.project)}
+              onClick={props.onRemove}
               icon={closeIcon}
               tooltipText={'Aus Liste entfernen'}
             />
@@ -39,21 +41,17 @@ export default function GoldiProjectCard(props: GoldiProjectCardProps) {
             </>
           }
           <Button
-            onClick={() => props.open(props.project)}
+            onClick={props.onOpen}
             variant="outline-dark"
             className="my-3"
           >
-            open
+            Open
           </Button>
         </Card.Body>
       </Card>
     </Col>
+    </>
   )
-
-  async function remove(project: Project) {
-    await projectDataRepository(project.id).delete();
-    await appDataRepository.projects.delete(project.id);
-  }
 
   function getFileReference(): string {
     if (!props.project.fileHandle) {

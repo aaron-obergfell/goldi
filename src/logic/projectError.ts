@@ -6,7 +6,8 @@ export enum ProjectErrorType {
   CheckSumMismatch = "CHECK_SUM_MISMATCH",
   AheadOfFile = "AHEAD_OF_FILE",
   InvalidData = "INVALID_DATA",
-  NoFileProvided = "NO_FILE_PROVIDED"
+  NoFileProvided = "NO_FILE_PROVIDED",
+  NoFileHandlePresent = "NO_FILE_HANDLE_PRESENT"
 }
 
 export interface ProjectError extends Error {

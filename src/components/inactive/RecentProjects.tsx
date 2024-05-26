@@ -2,10 +2,12 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Row, Spinner } from 'react-bootstrap';
 
 import { appDataRepository, Project } from '../../db/appData';
+import { checkRecentBeforeRemove } from '../../logic/projectService';
 import GoldiProjectCard from './GoldiProjectCard';
 
 type RecentProjectsProps = {
-  open: (projectId: Project) => void;
+  onOpen: (project: Project) => void;
+  onRemove: (project: Project) => void;
 }
 
 export default function RecentProjects(props: RecentProjectsProps) {
@@ -18,7 +20,17 @@ export default function RecentProjects(props: RecentProjectsProps) {
       {
         projects ? (
           <Row>
-            {projects.map((project) => (<GoldiProjectCard project={project} open={props.open} key={project.id}/>))}
+            {projects.map((project) => {
+
+              return (
+                <GoldiProjectCard
+                  project={project}
+                  onOpen={() => props.onOpen(project)}
+                  onRemove={() => props.onRemove(project)}
+                  key={project.id}
+                  />
+              )
+            })}
           </Row>
         ) : (
           <Spinner animation="border" size="sm" />

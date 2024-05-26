@@ -69,6 +69,29 @@ export async function checkRecent(project: Project): Promise<void> {
     }
 }
 
+
+
+export async function checkRecentBeforeRemove(project: Project): Promise<void> {
+    if (project.fileHandle === undefined) {
+        throw ProjectError(project, ProjectErrorType.NoFileHandlePresent);
+    }
+    if ("granted" !== await queryReadPermission(project.fileHandle)) {
+        throw ProjectError(project, ProjectErrorType.PermissionNotGranted);
+    }
+    let file: File;
+    try {
+        file = await project.fileHandle.getFile();
+    } catch (error) {
+        throw ProjectError(project, ProjectErrorType.FileNotFound);
+    }
+    if (project.state === ProjectState.AheadOfFile) {
+        throw ProjectError(project, ProjectErrorType.AheadOfFile);
+    }
+    if (!(await isCheckSumCorrect(project, file))) {
+        throw ProjectError(project, ProjectErrorType.CheckSumMismatch);
+    }
+}
+
 export async function removeFileReference(project: Project): Promise<Project> {
     const updatedProject: Project = {
         ...project,
@@ -118,4 +141,9 @@ export async function updateMetaData(project: Project, newMetaData: GoldiMeta) {
         meta: newMetaData,
         state: ProjectState.AheadOfFile
     });
+}
+
+export async function removeWithoutCheck(project: Project) {
+    await projectDataRepository(project.id).delete();
+    await appDataRepository.projects.delete(project.id);
 }
