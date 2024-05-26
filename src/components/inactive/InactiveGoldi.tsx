@@ -29,6 +29,14 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
 
   useEffect(() => {
     document.title = "Goldi";
+
+    if ('launchQueue' in window) {
+      window.launchQueue.setConsumer(async (launchParams: LaunchParams) => {
+        if (launchParams.files.length) {
+          await openByFileHandle(launchParams.files[0]);
+        };
+      });
+    }
   });
 
   useEffect(() => {
@@ -189,8 +197,12 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
 
   async function openFromFilePicker(): Promise<void> {
     setWaiting(true);
-    const fileHandle: FileSystemFileHandle | undefined = await getFileHandleFromFilePicker();
+    openByFileHandle(await getFileHandleFromFilePicker());
+  }
+
+  async function openByFileHandle(fileHandle: FileSystemFileHandle | undefined): Promise<void> {
     if (!fileHandle) {
+      setWaiting(false);
       return;
     }
     let project = await getRecentProjectOrElseUndefined(fileHandle);

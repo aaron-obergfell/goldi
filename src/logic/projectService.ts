@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { defaultMeta, GoldiJSON, GoldiMeta } from "../types/goldi";
 import md5 from 'md5';
 import { queryReadPermission } from "../fs/fileHandleHelper";
-import { ProjectError, ProjectErrorType } from "./projectError";
+import { newProjectError, ProjectErrorType } from "./projectError";
 import { projectDataRepository } from "../db/projectData";
 
 export async function getRecentProjectOrElseUndefined(fileHandle: FileSystemFileHandle): Promise<Project | undefined> {
@@ -53,19 +53,19 @@ export async function checkRecent(project: Project): Promise<void> {
         return;
     }
     if ("granted" !== await queryReadPermission(project.fileHandle)) {
-        throw ProjectError(project, ProjectErrorType.PermissionNotGranted);
+        throw newProjectError(project, ProjectErrorType.PermissionNotGranted);
     }
     let file: File;
     try {
         file = await project.fileHandle.getFile();
     } catch (error) {
-        throw ProjectError(project, ProjectErrorType.FileNotFound);
+        throw newProjectError(project, ProjectErrorType.FileNotFound);
     }
     if (project.state === ProjectState.AheadOfFile) {
-        throw ProjectError(project, ProjectErrorType.AheadOfFile);
+        throw newProjectError(project, ProjectErrorType.AheadOfFile);
     }
     if (!(await isCheckSumCorrect(project, file))) {
-        throw ProjectError(project, ProjectErrorType.CheckSumMismatch);
+        throw newProjectError(project, ProjectErrorType.CheckSumMismatch);
     }
 }
 
@@ -73,22 +73,22 @@ export async function checkRecent(project: Project): Promise<void> {
 
 export async function checkRecentBeforeRemove(project: Project): Promise<void> {
     if (project.fileHandle === undefined) {
-        throw ProjectError(project, ProjectErrorType.NoFileHandlePresent);
+        throw newProjectError(project, ProjectErrorType.NoFileHandlePresent);
     }
     if ("granted" !== await queryReadPermission(project.fileHandle)) {
-        throw ProjectError(project, ProjectErrorType.PermissionNotGranted);
+        throw newProjectError(project, ProjectErrorType.PermissionNotGranted);
     }
     let file: File;
     try {
         file = await project.fileHandle.getFile();
     } catch (error) {
-        throw ProjectError(project, ProjectErrorType.FileNotFound);
+        throw newProjectError(project, ProjectErrorType.FileNotFound);
     }
     if (project.state === ProjectState.AheadOfFile) {
-        throw ProjectError(project, ProjectErrorType.AheadOfFile);
+        throw newProjectError(project, ProjectErrorType.AheadOfFile);
     }
     if (!(await isCheckSumCorrect(project, file))) {
-        throw ProjectError(project, ProjectErrorType.CheckSumMismatch);
+        throw newProjectError(project, ProjectErrorType.CheckSumMismatch);
     }
 }
 
@@ -115,7 +115,7 @@ export async function prepare(project: Project): Promise<void> {
     }
     const fileContent = await file.text();
     if (false) {
-        throw ProjectError(project, ProjectErrorType.InvalidData);
+        throw newProjectError(project, ProjectErrorType.InvalidData);
     }
     const goldiJson: GoldiJSON = JSON.parse(fileContent);
     const projectUpdateSpec = {

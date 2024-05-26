@@ -1,4 +1,4 @@
-import { Button, Col, Container, Modal, Row } from 'react-bootstrap';
+import { Button, Col, Row } from 'react-bootstrap';
 
 type ButtonWithTextInsideModalProps = {
   onClick: () => void;

@@ -16,7 +16,7 @@ export interface ProjectError extends Error {
   type: ProjectErrorType;
 }
 
-export function ProjectError(project: Project, type: ProjectErrorType): ProjectError {
+export function newProjectError(project: Project, type: ProjectErrorType): ProjectError {
   const msg = `An error of type ${type} occured for project with id ${project.id}.`;
   const error = new Error(msg) as ProjectError;
   error.name = "ProjectError";

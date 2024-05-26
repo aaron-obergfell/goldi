@@ -1,4 +1,4 @@
-import { Button, Modal, Spinner } from 'react-bootstrap';
+import { Button, Modal } from 'react-bootstrap';
 import '../../css/goldi-btn.css';
 
 type UnexpectedErrorModalProps = {

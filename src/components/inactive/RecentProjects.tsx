@@ -2,7 +2,6 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Row, Spinner } from 'react-bootstrap';
 
 import { appDataRepository, Project } from '../../db/appData';
-import { checkRecentBeforeRemove } from '../../logic/projectService';
 import GoldiProjectCard from './GoldiProjectCard';
 
 type RecentProjectsProps = {

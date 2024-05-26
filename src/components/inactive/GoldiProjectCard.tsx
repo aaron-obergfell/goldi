@@ -1,8 +1,7 @@
 import { Button, Card, Col } from 'react-bootstrap';
 import Stack from 'react-bootstrap/Stack';
 
-import { appDataRepository, Project, ProjectState } from '../../db/appData';
-import { projectDataRepository } from '../../db/projectData';
+import { Project, ProjectState } from '../../db/appData';
 import closeIcon from '../../icons/close.svg'
 import GoldiColorBar from '../globals/GoldiColorBar';
 import SmallGoldiButton from '../globals/SmallGoldiButton';

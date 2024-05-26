@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
-import { appDataRepository, Project } from '../../../db/appData';
+import { Project } from '../../../db/appData';
 import { updateMetaData } from '../../../logic/projectService';
 import { GoldiMeta } from '../../../types/goldi';
 

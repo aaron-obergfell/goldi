@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
-
-import { openFileOnLaunch } from '../fs/open';
+import { useState } from 'react';
 import ActiveGoldi from './active/ActiveGoldi';
 import InactiveGoldi from './inactive/InactiveGoldi';
 
@@ -15,13 +13,6 @@ function App() {
 
   const [projectId, setProjectId] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    if ('launchQueue' in window) {
-      window.launchQueue.setConsumer((launchParams: LaunchParams) => {
-        openFileOnLaunch(launchParams, setProjectId);
-      });
-    }
-  }, []);
 
   return projectId ? (
     <ActiveGoldi
