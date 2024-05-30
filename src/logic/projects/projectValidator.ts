@@ -1,6 +1,6 @@
 import { Project, ProjectState } from "../../db/appData";
 import md5 from 'md5';
-import { queryReadPermission } from "../../fs/fileHandleHelper";
+import { queryReadPermission, queryReadWritePermission } from "../../fs/fileHandleHelper";
 import { newProjectError, ProjectErrorType } from "./projectError";
 
 export enum ProjectValidationTrigger {
@@ -12,22 +12,24 @@ export enum ProjectValidationTrigger {
 
 export async function validate(project: Project, trigger: ProjectValidationTrigger): Promise<void> {
     switch (trigger) {
-        case ProjectValidationTrigger.OpenRecent: {
+        case ProjectValidationTrigger.OpenRecent:
             if (project.fileHandle === undefined) {
                 return;
             }
-            await validateFile(project);
+            await validateReadFile(project);
             validateProjectStateNotAheadOfFile(project);
             await validateCheckSum(project);
-            break;
-        };
-        case ProjectValidationTrigger.RemoveRecent: {
+            return;
+        case ProjectValidationTrigger.RemoveRecent:
             validateFileHandleIsPresent(project);
-            await validateFile(project);
+            await validateReadFile(project);
             validateProjectStateNotAheadOfFile(project);
             await validateCheckSum(project);
-            break;
-        }
+            return;
+        case ProjectValidationTrigger.Save:
+            await validateReadWriteFile(project);
+            await validateCheckSum(project);
+            return;
     }
 }
 
@@ -37,11 +39,25 @@ function validateFileHandleIsPresent(project: Project): void {
     }
 }
 
-async function validateFile(project: Project): Promise<void> {
+async function validateReadFile(project: Project): Promise<void> {
     if (!project.fileHandle) {
         throw new Error("fileHandle was expected");
     }
     if ("granted" !== await queryReadPermission(project.fileHandle)) {
+        throw newProjectError(project, ProjectErrorType.PermissionNotGranted);
+    }
+    try {
+        await project.fileHandle.getFile();
+    } catch (error) {
+        throw newProjectError(project, ProjectErrorType.FileNotFound);
+    }
+}
+
+async function validateReadWriteFile(project: Project): Promise<void> {
+    if (!project.fileHandle) {
+        throw new Error("fileHandle was expected");
+    }
+    if ("granted" !== await queryReadWritePermission(project.fileHandle)) {
         throw newProjectError(project, ProjectErrorType.PermissionNotGranted);
     }
     try {

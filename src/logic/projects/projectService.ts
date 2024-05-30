@@ -1,10 +1,10 @@
 import { appDataRepository, Project, ProjectState } from "../../db/appData";
 import { v4 as uuidv4 } from 'uuid';
-import { defaultMeta, GoldiJSON, GoldiMeta } from "../../types/goldi";
+import { defaultMeta, GoldiData, GoldiJSON, GoldiMeta } from "../../types/goldi";
 import md5 from 'md5';
-import { queryReadPermission } from "../../fs/fileHandleHelper";
 import { newProjectError, ProjectErrorType } from "./projectError";
 import { projectDataRepository } from "../../db/projectData";
+import { getWritable } from "../../fs/fileHandleHelper";
 
 export async function getRecentProjectOrElseUndefined(fileHandle: FileSystemFileHandle): Promise<Project | undefined> {
     let allProjects: Project[] = await appDataRepository.projects.toArray();
@@ -16,10 +16,10 @@ export async function getRecentProjectOrElseUndefined(fileHandle: FileSystemFile
     return undefined;
 }
 
-export const createNewProjectForFileHandle: (fH: FileSystemFileHandle) => Promise<Project> = async (fH) => {
+export async function createNewProjectForFileHandle(fileHandle: FileSystemFileHandle): Promise<Project> {
     const newProject: Project = {
         id: uuidv4(),
-        fileHandle: fH,
+        fileHandle: fileHandle,
         meta: defaultMeta,
         checkSum: undefined,
         state: ProjectState.Empty
@@ -28,7 +28,7 @@ export const createNewProjectForFileHandle: (fH: FileSystemFileHandle) => Promis
     return newProject;
 }
 
-export const createNewProjectWithoutFileHandle: () => Promise<Project> = async () => {
+export async function createNewProjectWithoutFileHandle(): Promise<Project> {
     const newProject: Project = {
         id: uuidv4(),
         fileHandle: undefined,
@@ -56,23 +56,14 @@ export async function removeFileReference(project: Project): Promise<Project> {
 }
 
 export async function prepare(project: Project): Promise<void> {
-    if (!project.fileHandle) {
-        throw Error("No fileHandle found for project.");
-    }
-    let file: File;
-    try {
-        file = await project.fileHandle.getFile();
-    } catch (error) {
-        throw Error("File not found.", { cause: error });
-    }
-    const fileContent = await file.text();
+    const fileContent = await getContentFromAssociatedFile(project);
     if (false) {
         throw newProjectError(project, ProjectErrorType.InvalidData);
     }
     const goldiJson: GoldiJSON = JSON.parse(fileContent);
     const projectUpdateSpec = {
         meta: goldiJson.meta,
-        checkSum: await getCheckSum(file),
+        checkSum: md5(fileContent),
         state: ProjectState.InSync
     };
     await appDataRepository.projects.update(project.id, projectUpdateSpec);
@@ -89,9 +80,10 @@ export async function prepare(project: Project): Promise<void> {
 }
 
 export async function updateMetaData(project: Project, newMetaData: GoldiMeta) {
+    const newState: ProjectState = project.fileHandle ? ProjectState.AheadOfFile : ProjectState.Draft;
     await appDataRepository.projects.update(project.id, {
         meta: newMetaData,
-        state: ProjectState.AheadOfFile
+        state: newState
     });
 }
 
@@ -99,3 +91,64 @@ export async function removeWithoutCheck(project: Project) {
     await projectDataRepository(project.id).delete();
     await appDataRepository.projects.delete(project.id);
 }
+
+export async function saveToFile(project: Project): Promise<void> {
+    if (!project.fileHandle) {
+        throw Error("No fileHandle found for project.");
+    }
+    const writable = await getWritable(project.fileHandle);
+    const goldiJson: GoldiJSON = await computeGoldiJSON(project);
+    await writable.write(JSON.stringify(goldiJson, null, 2));
+    await writable.close();
+    await markAsInSync(project);
+}
+
+export async function saveToOtherFile(project: Project, fileHandle: FileSystemFileHandle): Promise<void> {
+    const writable = await getWritable(fileHandle);
+    const goldiJson: GoldiJSON = await computeGoldiJSON(project);
+    await writable.write(JSON.stringify(goldiJson, null, 2));
+    await writable.close();
+}
+
+export async function addFileHandle(project: Project, fileHandle: FileSystemFileHandle): Promise<Project> {
+    const updatedProject: Project = {
+        ...project,
+        fileHandle: fileHandle
+    };
+    await appDataRepository.projects.update(project.id, updatedProject);
+    return updatedProject;
+}
+
+async function computeGoldiJSON(project: Project): Promise<GoldiJSON> {
+    const db = projectDataRepository(project.id);
+    const goldiData: GoldiData = {
+        columns: await db.columns.toArray(),
+        values: await db.values.toArray(),
+        items: await db.items.toArray(),
+        images: await db.images.toArray(),
+        itemToImageMappings: await db.itemToImageMappings.toArray(),
+        itemToValueMappings: await db.itemToValueMappings.toArray(),
+        itemToValueAssignments: await db.itemToValueAssignments.toArray()
+    }
+    return { meta: project.meta, data: goldiData };
+}
+
+async function markAsInSync(project: Project) {
+    await appDataRepository.projects.update(project.id, {
+        state: ProjectState.InSync,
+        checkSum: md5(await getContentFromAssociatedFile(project))
+    });
+}
+
+async function getContentFromAssociatedFile(project: Project): Promise<string> {
+    if (!project.fileHandle) {
+        throw Error("No fileHandle found for project.");
+    }
+    let file: File;
+    try {
+        file = await project.fileHandle.getFile();
+    } catch (error) {
+        throw Error("File not found.", { cause: error });
+    }
+    return await file.text();
+}  

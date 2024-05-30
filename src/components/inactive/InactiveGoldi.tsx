@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Button, Container } from 'react-bootstrap';
 import { Project } from '../../db/appData';
-import { requestReadWritePermission } from '../../fs/fileHandleHelper';
+import { requestReadPermission } from '../../fs/fileHandleHelper';
 
-import { getFileHandleFromFilePicker, newProject } from '../../fs/open';
+import { getFileHandleFromFilePicker } from '../../fs/open';
 import { isProjectError, ProjectError, ProjectErrorType } from '../../logic/projects/projectError';
-import { createNewProjectForFileHandle, getRecentProjectOrElseUndefined, prepare, removeFileReference, removeWithoutCheck } from '../../logic/projects/projectService';
+import { createNewProjectForFileHandle, createNewProjectWithoutFileHandle, getRecentProjectOrElseUndefined, prepare, removeFileReference, removeWithoutCheck } from '../../logic/projects/projectService';
 import { ProjectValidationTrigger, validate } from '../../logic/projects/projectValidator';
 import UnexpectedErrorModal from '../globals/UnexpectedErrorModal';
 import WaitingModal from '../globals/WaitingModal';
@@ -55,7 +55,7 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
             Open
           </Button>
           - - -
-          <Button onClick={() => newProject(props.setProjectId)} variant="outline-dark" className="my-3" >
+          <Button onClick={() => openNew()} variant="outline-dark" className="my-3" >
             New
           </Button>
         </div>
@@ -253,7 +253,7 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
 
   async function requestPermissionAndOpen(project: Project): Promise<void> {
     setWaiting(true);
-    await requestReadWritePermission(project.fileHandle);
+    await requestReadPermission(project.fileHandle);
     await openRecentProject(project);
   }
 
@@ -265,6 +265,12 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
     } catch (err: any) {
       setUnexpectedErrorOccured(true);
     }
+  }
+
+  async function openNew(): Promise<void> {
+    setWaiting(true);
+    const newProject: Project = await createNewProjectWithoutFileHandle();
+    props.setProjectId(newProject.id);
   }
 
   function abort(): void {

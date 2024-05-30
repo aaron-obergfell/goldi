@@ -1,9 +1,13 @@
 export async function queryReadPermission(fileHandle) {
-    if (fileHandle) {
-        return await fileHandle.queryPermission({ mode: "read" });
-    } else {
-        return "granted";
-    }
+    return await fileHandle.queryPermission({ mode: "read" });
+}
+
+export async function queryReadWritePermission(fileHandle) {
+    return await fileHandle.queryPermission({ mode: "readwrite" });
+}
+
+export async function requestReadPermission(fileHandle) {
+    return await fileHandle.requestPermission({ mode: "read" });
 }
 
 export async function requestReadWritePermission(fileHandle) {
