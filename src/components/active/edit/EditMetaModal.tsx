@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import { Project } from '../../../db/appData';
-import { updateMetaData } from '../../../logic/projectService';
+import { updateMetaData } from '../../../logic/projects/projectService';
 import { GoldiMeta } from '../../../types/goldi';
 
 type EditMetaModalProps = {

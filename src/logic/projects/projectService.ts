@@ -1,10 +1,10 @@
-import { appDataRepository, Project, ProjectState } from "../db/appData";
+import { appDataRepository, Project, ProjectState } from "../../db/appData";
 import { v4 as uuidv4 } from 'uuid';
-import { defaultMeta, GoldiJSON, GoldiMeta } from "../types/goldi";
+import { defaultMeta, GoldiJSON, GoldiMeta } from "../../types/goldi";
 import md5 from 'md5';
-import { queryReadPermission } from "../fs/fileHandleHelper";
+import { queryReadPermission } from "../../fs/fileHandleHelper";
 import { newProjectError, ProjectErrorType } from "./projectError";
-import { projectDataRepository } from "../db/projectData";
+import { projectDataRepository } from "../../db/projectData";
 
 export async function getRecentProjectOrElseUndefined(fileHandle: FileSystemFileHandle): Promise<Project | undefined> {
     let allProjects: Project[] = await appDataRepository.projects.toArray();
@@ -42,54 +42,6 @@ export const createNewProjectWithoutFileHandle: () => Promise<Project> = async (
 
 export async function getCheckSum(file: File): Promise<string> {
     return md5(await file.text());
-}
-
-async function isCheckSumCorrect(project: Project, file: File): Promise<boolean> {
-    return md5(await file.text()) === project.checkSum;
-}
-
-export async function checkRecent(project: Project): Promise<void> {
-    if (project.fileHandle === undefined) {
-        return;
-    }
-    if ("granted" !== await queryReadPermission(project.fileHandle)) {
-        throw newProjectError(project, ProjectErrorType.PermissionNotGranted);
-    }
-    let file: File;
-    try {
-        file = await project.fileHandle.getFile();
-    } catch (error) {
-        throw newProjectError(project, ProjectErrorType.FileNotFound);
-    }
-    if (project.state === ProjectState.AheadOfFile) {
-        throw newProjectError(project, ProjectErrorType.AheadOfFile);
-    }
-    if (!(await isCheckSumCorrect(project, file))) {
-        throw newProjectError(project, ProjectErrorType.CheckSumMismatch);
-    }
-}
-
-
-
-export async function checkRecentBeforeRemove(project: Project): Promise<void> {
-    if (project.fileHandle === undefined) {
-        throw newProjectError(project, ProjectErrorType.NoFileHandlePresent);
-    }
-    if ("granted" !== await queryReadPermission(project.fileHandle)) {
-        throw newProjectError(project, ProjectErrorType.PermissionNotGranted);
-    }
-    let file: File;
-    try {
-        file = await project.fileHandle.getFile();
-    } catch (error) {
-        throw newProjectError(project, ProjectErrorType.FileNotFound);
-    }
-    if (project.state === ProjectState.AheadOfFile) {
-        throw newProjectError(project, ProjectErrorType.AheadOfFile);
-    }
-    if (!(await isCheckSumCorrect(project, file))) {
-        throw newProjectError(project, ProjectErrorType.CheckSumMismatch);
-    }
 }
 
 export async function removeFileReference(project: Project): Promise<Project> {

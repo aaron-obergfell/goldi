@@ -4,8 +4,9 @@ import { Project } from '../../db/appData';
 import { requestReadWritePermission } from '../../fs/fileHandleHelper';
 
 import { getFileHandleFromFilePicker, newProject } from '../../fs/open';
-import { isProjectError, ProjectError, ProjectErrorType } from '../../logic/projectError';
-import { checkRecent, checkRecentBeforeRemove, createNewProjectForFileHandle, getRecentProjectOrElseUndefined, prepare, removeFileReference, removeWithoutCheck } from '../../logic/projectService';
+import { isProjectError, ProjectError, ProjectErrorType } from '../../logic/projects/projectError';
+import { createNewProjectForFileHandle, getRecentProjectOrElseUndefined, prepare, removeFileReference, removeWithoutCheck } from '../../logic/projects/projectService';
+import { ProjectValidationTrigger, validate } from '../../logic/projects/projectValidator';
 import UnexpectedErrorModal from '../globals/UnexpectedErrorModal';
 import WaitingModal from '../globals/WaitingModal';
 import OnOpenAheadOfFileModal from './errorModalsOnOpen/OnOpenAheadOfFileModal';
@@ -158,7 +159,7 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
   async function openRecentProject(project: Project): Promise<void> {
     setWaiting(true);
     try {
-      await checkRecent(project);
+      await validate(project, ProjectValidationTrigger.OpenRecent);
       props.setProjectId(project.id);
     } catch (err: any) {
       if (isProjectError(err)) {
@@ -172,7 +173,7 @@ export default function InactiveGoldi(props: InactiveGoldiProps) {
   async function removeRecentProject(project: Project): Promise<void> {
     setWaiting(true);
     try {
-      await checkRecentBeforeRemove(project);
+      await validate(project, ProjectValidationTrigger.RemoveRecent);
       await removeWithoutCheck(project);
       setWaiting(false);
     } catch (err: any) {

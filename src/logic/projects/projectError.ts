@@ -1,4 +1,4 @@
-import { Project } from "../db/appData";
+import { Project } from "../../db/appData";
 
 export enum ProjectErrorType {
   FileNotFound = "FILE_NOT_FOUND",

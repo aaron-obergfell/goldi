@@ -1,7 +1,6 @@
 import { Stack, Tab, Tabs } from 'react-bootstrap';
 import saveIcon from '../../icons/save.svg'
 import saveAsIcon from '../../icons/save_as.svg'
-import syncIcon from '../../icons/sync.svg'
 import closeIcon from '../../icons/close.svg'
 import SmallGoldiButton from '../globals/SmallGoldiButton';
 import { GoldiMode } from './ActiveGoldi';
@@ -11,7 +10,6 @@ type NavBarProps = {
   projectId: string;
   onClose: () => void;
   setGoldiMode: (mode: GoldiMode) => void;
-  loadFile: (id: string) => Promise<void>;
   save: (id: string) => Promise<void>;
 
 }
@@ -33,13 +31,6 @@ export default function NavBarForActiveGoldi(props: NavBarProps) {
           onClick={() => alert("Not yet implemented")}
           icon={saveAsIcon}
           tooltipText={'Speichern unter'}
-        />
-
-        <SmallGoldiButton
-          active={!props.saveNeeded}
-          onClick={() => props.loadFile(props.projectId)}
-          icon={syncIcon}
-          tooltipText={'Neu laden'}
         />
 
         <div className='ms-auto'>

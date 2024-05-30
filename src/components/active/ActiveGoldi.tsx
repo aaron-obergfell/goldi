@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { appDataRepository, Project } from '../../db/appData';
-import { defaultMeta, GoldiData, GoldiJSON } from '../../types/goldi';
+import { GoldiData, GoldiJSON } from '../../types/goldi';
 import GoldiView from './view/GoldiView';
 import { onBeforeUnload } from '../../window/onbeforeunload';
 import { getFileHandleFromSavePicker, getWritable } from '../../fs/fileHandleHelper';
@@ -9,7 +9,7 @@ import GoldiEdit from './edit/GoldiEdit';
 import NavBarForActiveGoldi from './NavBarForActiveGoldi';
 import { Container } from 'react-bootstrap';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { getCheckSum } from '../../logic/projectService'
+import { getCheckSum } from '../../logic/projects/projectService'
 
 type ActiveGoldiProps = {
   projectId: string;
@@ -47,51 +47,16 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
         projectId={props.projectId}
         onClose={props.onClose}
         setGoldiMode={setGoldiMode}
-        loadFile={loadFile}
         save={save}
       />
       {(project && project.meta && (goldiMode === GoldiMode.View)) &&
         <GoldiView projectId={props.projectId} goldiMeta={project.meta}></GoldiView>
       }
       {(project && (goldiMode === GoldiMode.Edit)) &&
-        <GoldiEdit project={project}/>
+        <GoldiEdit project={project} />
       }
     </Container>
   );
-
-  async function loadFile(id: string): Promise<void> {
-    projectDataRepository(id).delete().then(async () => {
-      const project = await appDataRepository.projects.get(id);
-      if (project && project.fileHandle !== undefined) {
-        let file;
-        try {
-          file = await project.fileHandle.getFile();
-        } catch (error) {
-          console.log("keine Datei gefunden")
-          console.log((error as Error).constructor.name)
-          file = new File([], "pla");
-        }
-        let goldiJson: GoldiJSON = JSON.parse(await file.text());
-        await appDataRepository.projects.update(id, {meta: goldiJson.meta});
-        const db = projectDataRepository(id);
-        db.columns.bulkAdd(goldiJson.data.columns);
-        db.values.bulkAdd(goldiJson.data.values);
-        db.items.bulkAdd(goldiJson.data.items);
-        db.images.bulkAdd(goldiJson.data.images);
-        db.itemToImageMappings.bulkAdd(goldiJson.data.itemToImageMappings);
-        db.itemToValueMappings.bulkAdd(goldiJson.data.itemToValueMappings);
-        db.itemToValueAssignments.bulkAdd(goldiJson.data.itemToValueAssignments);
-        toggleSaveNeeded(false);
-        let newCheckSum = await getCheckSum(file);
-        await appDataRepository.projects.update(id, {checkSum: newCheckSum});
-      } else if (project) {
-        await appDataRepository.projects.update(id, {meta: defaultMeta});
-        toggleSaveNeeded(true);
-      } else {
-        alert("Fehler")
-      }
-    });
-  }
 
   async function save(id: string): Promise<void> {
     const project = await appDataRepository.projects.get(id);
@@ -114,7 +79,7 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
       await writable.close();
       toggleSaveNeeded(false);
       let newCheckSum = await getCheckSum(await fileHandle.getFile());
-      await appDataRepository.projects.update(id, {checkSum: newCheckSum});
+      await appDataRepository.projects.update(id, { checkSum: newCheckSum });
     } else if (project && project.meta) {
       let fileHandle: FileSystemFileHandle = await getFileHandleFromSavePicker();
       appDataRepository.projects.update(id, { "fileHandle": fileHandle });
@@ -135,7 +100,7 @@ export default function ActiveGoldi(props: ActiveGoldiProps) {
       await writable.close();
       toggleSaveNeeded(false);
       let newCheckSum = await getCheckSum(await fileHandle.getFile());
-      await appDataRepository.projects.update(id, {checkSum: newCheckSum});
+      await appDataRepository.projects.update(id, { checkSum: newCheckSum });
     } else {
       alert("Fehler")
     }
