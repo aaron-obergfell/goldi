@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import { Project } from '../../../db/appData';
@@ -6,7 +6,6 @@ import { updateMetaData } from '../../../logic/projects/projectService';
 import { GoldiMeta } from '../../../types/goldi';
 
 type EditMetaModalProps = {
-  show: boolean
   project: Project;
   onFinish: () => void;
 }
@@ -16,7 +15,7 @@ export default function EditMetaModal(props: EditMetaModalProps) {
   const [updatedGoldiMeta, setUpdatedGoldiMeta] = useState<GoldiMeta>(props.project.meta);
 
   return (<Modal
-    show={props.show}
+    show={true}
     centered
     animation={false}
     backdrop="static"

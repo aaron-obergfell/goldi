@@ -14,6 +14,7 @@ export enum GoldiColumnType {
 export type GoldiColumn = {
     id?: number;
     name: string;
+    description: string;
     type: GoldiColumnType;
     position: number;
     visible: boolean;

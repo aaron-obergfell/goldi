@@ -80,11 +80,13 @@ export async function prepare(project: Project): Promise<void> {
 }
 
 export async function updateMetaData(project: Project, newMetaData: GoldiMeta) {
+    await appDataRepository.projects.update(project.id, {meta: newMetaData});
+    await markAsEdited(project);
+}
+
+export async function markAsEdited(project: Project) {
     const newState: ProjectState = project.fileHandle ? ProjectState.AheadOfFile : ProjectState.Draft;
-    await appDataRepository.projects.update(project.id, {
-        meta: newMetaData,
-        state: newState
-    });
+    await appDataRepository.projects.update(project.id, {state: newState});
 }
 
 export async function removeWithoutCheck(project: Project) {

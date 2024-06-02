@@ -134,6 +134,7 @@ export default function ColumnForm(props: ColumnFormProps) {
     try {
       await projectDataRepository(props.projectId).columns.add({
         name: name,
+        description: "",
         type: type,
         visible: visible,
         position: await determineNewPosition()
