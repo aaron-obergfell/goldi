@@ -6,6 +6,7 @@ import SmallGoldiButton from '../../globals/SmallGoldiButton'
 import EditMetaModal from './EditMetaModal';
 import AddColumnModal from './AddColumnModal';
 import { Stack } from 'react-bootstrap';
+import EditGoldiTable from './EditGoldiTable';
 
 type GoldiEditProps = {
   project: Project
@@ -44,6 +45,7 @@ export default function GoldiEdit(props: GoldiEditProps) {
           onFinish={() => setAddColumn(false)}
         />
       }
+      <EditGoldiTable project={props.project}></EditGoldiTable>
     </>
   )
 

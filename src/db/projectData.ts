@@ -77,8 +77,8 @@ export class ProjectDataRepository extends Dexie {
             items: '++id',
             images: '++id',
             itemToValueMappings: '++id, itemId',
-            itemToImageMappings: '++id',
-            itemToValueAssignments: '++id, value, itemId'
+            itemToImageMappings: '++id, columnId',
+            itemToValueAssignments: '++id, value, itemId, columnId'
         });
     }
 }
