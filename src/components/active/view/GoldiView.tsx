@@ -1,3 +1,4 @@
+import { log } from 'console';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState, useEffect } from 'react';
 import { Table } from 'react-bootstrap';
@@ -31,6 +32,7 @@ export default function GoldiView(props: GoldiViewProps) {
 
   useEffect(() => {
     computeInMemoryItems();
+    console.log(JSON.stringify(inMemoryItems));
   }, [columns]);
 
   return (

@@ -6,6 +6,7 @@ type SmallGoldiButtonProps = {
   onClick: () => void;
   icon: string;
   tooltipText: string;
+  visibleOnHover?: boolean;
 }
 
 export default function SmallGoldiButton(props: SmallGoldiButtonProps) {
@@ -18,13 +19,15 @@ export default function SmallGoldiButton(props: SmallGoldiButtonProps) {
 
   return (
     <OverlayTrigger placement="bottom" overlay={tooltip}>
-      <img
-        src={props.icon}
-        alt="?"
-        onClick={props.onClick}
-        className={props.active ? "active" : "inactive"}
-        width={"20px"}
-      />
+      <div className={props.visibleOnHover ? "visible-on-hover" : ""}>
+        <img
+          src={props.icon}
+          alt="?"
+          onClick={props.onClick}
+          className={props.active ? "active" : "inactive"}
+          width={"20px"}
+        />
+      </div>
     </OverlayTrigger>
   );
 }

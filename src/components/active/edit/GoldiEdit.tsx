@@ -5,8 +5,9 @@ import addColumnIcon from '../../../icons/add_column.png'
 import SmallGoldiButton from '../../globals/SmallGoldiButton'
 import EditMetaModal from './EditMetaModal';
 import AddColumnModal from './AddColumnModal';
-import { Stack } from 'react-bootstrap';
+import { Button, Stack } from 'react-bootstrap';
 import EditGoldiTable from './EditGoldiTable';
+import { createEmptyItem } from '../../../logic/items/itemsService';
 
 type GoldiEditProps = {
   project: Project
@@ -32,6 +33,13 @@ export default function GoldiEdit(props: GoldiEditProps) {
           icon={addColumnIcon}
           tooltipText={'Add new column'}
         />
+        <Button
+          active={true}
+          onClick={() => createEmptyItem(props.project)}
+          title={"New row"}
+        >
+          New row
+        </Button>
       </Stack>
       {editMetaData &&
         <EditMetaModal

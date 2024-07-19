@@ -14,6 +14,7 @@ import rightIcon from '../../../icons/right.png';
 import { deleteColumn, moveLeft, moveRight } from "../../../logic/columns/columnsService";
 import ChangeColumnNameModal from "./ChangeColumnNameModal";
 import ColumnDeleteConfirmationModal from "./ColumnDeleteConfirmationModal";
+import EditItemCell from "./EditItemCell";
 
 type EditGoldiTableProps = {
   project: Project;
@@ -25,6 +26,8 @@ export default function EditGoldiTable(props: EditGoldiTableProps) {
   const db: ProjectDataRepository = projectDataRepository(props.project.id);
 
   const columns = useLiveQuery(() => db.columns.orderBy("position").filter(column => column.visible).toArray());
+  const items = useLiveQuery(() => db.items.toArray());
+
   const [columnToChange, setColumnToChange] = useState<GoldiColumn | undefined>(undefined);
   const [columnToDelete, setColumnToDelete] = useState<GoldiColumn | undefined>(undefined);
 
@@ -45,6 +48,19 @@ export default function EditGoldiTable(props: EditGoldiTableProps) {
       <Table bordered responsive>
         <thead>
           <tr>
+            <td>
+              <h4>Titel</h4>
+              <p><i>What ever</i></p>
+              <hr />
+              <Stack direction="horizontal" gap={2} style={{ width: '100%' }}>
+                <SmallGoldiButton
+                  active={true}
+                  onClick={() => alert("ist ja gut, bau ich noch!!!!")}
+                  icon={editIcon}
+                  tooltipText={"Spaltenüberschrift bearbeiten"}
+                />
+              </Stack>
+            </td>
             {columns?.map((column) => (
               <td key={column.id}>
                 <h4>{column.name}</h4>
@@ -81,36 +97,24 @@ export default function EditGoldiTable(props: EditGoldiTableProps) {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            {columns?.map((column) => (
-              <td key={column.id}>{"Wert_1_" + column.id}</td>
-            ))}
-          </tr>
-          <tr>
-            {columns?.map((column) => (
-              <td key={column.id}>{"Wert_2_" + column.id}</td>
-            ))}
-          </tr>
-          <tr>
-            {columns?.map((column) => (
-              <td key={column.id}>{"Wert_3_" + column.id}</td>
-            ))}
-          </tr>
-          <tr>
-            {columns?.map((column) => (
-              <td key={column.id}>{"Wert_4_" + column.id}</td>
-            ))}
-          </tr>
-          <tr>
-            {columns?.map((column) => (
-              <td key={column.id}>{"Wert_5_" + column.id}</td>
-            ))}
-          </tr>
-          <tr>
-            {columns?.map((column) => (
-              <td key={column.id}>{"Wert_6_" + column.id}</td>
-            ))}
-          </tr>
+          {items?.map((item) => (
+            <tr>
+              <td>
+                {item.titel}
+              </td>
+              {columns?.map((column) => (
+                <td key={`cell_${item.id}_${column.id}`}>
+                  <EditItemCell
+                    project={props.project}
+                    column={column}
+                    item={item}
+                    onLock={() => alert('lock')}
+                    onRelease={() => alert('release')}
+                  />
+                </td>
+              ))}
+            </tr>
+          ))}
         </tbody>
       </Table>
     </>

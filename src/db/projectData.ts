@@ -5,8 +5,8 @@ export enum GoldiColumnType {
     // Enum = "ENUM",
     List = "LIST",
     // Image = "IMAGE",
-    // Integer = "INTEGER",
-    // Float = "FLOAT",
+    Integer = "INTEGER",
+    Float = "FLOAT",
     // Date = "DATE",
     // DateTime = "DATE_TIME"
 }
@@ -78,7 +78,7 @@ export class ProjectDataRepository extends Dexie {
             images: '++id',
             itemToValueMappings: '++id, itemId',
             itemToImageMappings: '++id, columnId',
-            itemToValueAssignments: '++id, value, itemId, columnId'
+            itemToValueAssignments: '++id, value, [itemId+columnId], columnId'
         });
     }
 }

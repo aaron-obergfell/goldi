@@ -11,3 +11,11 @@
 .tooltip {
     pointer-events: none;
 }
+
+.visible-on-hover > img {
+    visibility: hidden;
+}
+
+.visible-on-hover:hover > img {
+    visibility:visible;
+}
