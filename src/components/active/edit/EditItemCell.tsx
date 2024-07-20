@@ -26,7 +26,7 @@ export default function EditItemCell(props: EditItemCellProps) {
   }).first());
 
   const [userWantsToEdit, setUserWantsToEdit] = useState<boolean>(false);
-  const [cellValue, setCellValue] = useState<string | number>("");
+  const [cellValue, setCellValue] = useState<string | number | undefined>(undefined);
 
   useEffect(() => {
     if (itemToValueAssignment) {
@@ -34,55 +34,44 @@ export default function EditItemCell(props: EditItemCellProps) {
     }
   }, [itemToValueAssignment]);
 
-  const ref = useOutsideClick(() => {
-    setUserWantsToEdit(false);
-  });
+  const reference = useOutsideClick(update);
 
   if (userWantsToEdit) {
     return (
-      <InputGroup className="mb-3" ref={ref}>
+      <div ref={reference}>
         <Form.Control
+          className="shadow-none"
           type={mapToHtmlInputType(props.column.type)}
           value={cellValue}
           aria-describedby="basic-addon2"
           onChange={e => setCellValue(e.target.value as unknown as number)}
+          autoFocus
         />
-        <Button
-          variant="outline-dark"
-          id="button-addon2"
-          onClick={update}
-        >
-          Ok
-        </Button>
-      </InputGroup>
-
+      </div>
     )
   }
 
   return (
-    <Stack direction="horizontal" gap={3}>
-      <div className="p-2">
-        {cellValue}
-      </div>
-      <div className="p-2 ms-auto">
-        <SmallGoldiButton
-          active={true}
-          onClick={() => setUserWantsToEdit(true)}
-          icon={editIcon}
-          tooltipText={"Wert ändern"}
-          visibleOnHover={true}
-        />
-      </div>
-    </Stack>
+    <div
+      className="w-100 bg-light"
+      onClick={() => setUserWantsToEdit(true)}
+      style={{
+        minHeight: '1.5em'
+      }}
+    >
+      {cellValue}
+    </div>
   );
 
   async function update() {
-    await updateValue(props.project, props.item, props.column, cellValue);
+    if (cellValue && (!itemToValueAssignment || itemToValueAssignment.value !== cellValue)) {
+      await updateValue(props.project, props.item, props.column, cellValue);
+    }
     setUserWantsToEdit(false)
   }
 
   function mapToHtmlInputType(columnType: GoldiColumnType): string {
-    switch(columnType) {
+    switch (columnType) {
       case GoldiColumnType.Float: return "number";
       case GoldiColumnType.Integer: return "number";
       case GoldiColumnType.Text: return "text";

@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { Project } from '../../../db/appData';
 import metaDataIcon from '../../../icons/meta_data.svg'
 import addColumnIcon from '../../../icons/add_column.png'
+import addRowIcon from '../../../icons/add_row.png'
 import SmallGoldiButton from '../../globals/SmallGoldiButton'
 import EditMetaModal from './EditMetaModal';
 import AddColumnModal from './AddColumnModal';
 import { Button, Stack } from 'react-bootstrap';
 import EditGoldiTable from './EditGoldiTable';
 import { createEmptyItem } from '../../../logic/items/itemsService';
+import GoldiColorBar from '../../globals/GoldiColorBar';
 
 type GoldiEditProps = {
   project: Project
@@ -33,14 +35,18 @@ export default function GoldiEdit(props: GoldiEditProps) {
           icon={addColumnIcon}
           tooltipText={'Add new column'}
         />
-        <Button
+        <SmallGoldiButton
           active={true}
           onClick={() => createEmptyItem(props.project)}
-          title={"New row"}
-        >
-          New row
-        </Button>
+          icon={addRowIcon}
+          tooltipText={'Add new row'}
+        />
       </Stack>
+      <h1>{props.project.meta.title}</h1>
+      <GoldiColorBar color={props.project.meta.color} />
+      <p>
+        {props.project.meta.description}
+      </p>
       {editMetaData &&
         <EditMetaModal
           project={props.project}
