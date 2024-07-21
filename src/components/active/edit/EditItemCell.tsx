@@ -43,24 +43,31 @@ export default function EditItemCell(props: EditItemCellProps) {
           className="shadow-none"
           type={mapToHtmlInputType(props.column.type)}
           value={cellValue}
-          aria-describedby="basic-addon2"
           onChange={e => setCellValue(e.target.value as unknown as number)}
+          onKeyDown={e => {
+            console.log(e.key);
+            if (e.key === "Enter" || e.key === "Tab") {
+              update();
+            }
+          }}
           autoFocus
+          step={props.column.type === GoldiColumnType.Float ? "0.01" : "1"}
         />
       </div>
     )
   }
 
   return (
-    <div
+    <button
       className="w-100 bg-light"
       onClick={() => setUserWantsToEdit(true)}
       style={{
-        minHeight: '1.5em'
+        minHeight: '1.5em',
+        border: 'none'
       }}
     >
       {cellValue}
-    </div>
+    </button>
   );
 
   async function update() {

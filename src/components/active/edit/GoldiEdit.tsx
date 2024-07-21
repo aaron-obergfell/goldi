@@ -10,6 +10,7 @@ import { Button, Stack } from 'react-bootstrap';
 import EditGoldiTable from './EditGoldiTable';
 import { createEmptyItem } from '../../../logic/items/itemsService';
 import GoldiColorBar from '../../globals/GoldiColorBar';
+import MediumGoldiButton from '../../globals/MediumGoldiButton copy';
 
 type GoldiEditProps = {
   project: Project
@@ -22,20 +23,20 @@ export default function GoldiEdit(props: GoldiEditProps) {
 
   return (
     <>
-      <Stack direction="horizontal" gap={2}>
-        <SmallGoldiButton
+      <Stack direction="horizontal" gap={3} className="py-3">
+        <MediumGoldiButton
           active={true}
           onClick={() => setEditMetaData(true)}
           icon={metaDataIcon}
           tooltipText={'edit meta data'}
         />
-        <SmallGoldiButton
+        <MediumGoldiButton
           active={true}
           onClick={() => setAddColumn(true)}
           icon={addColumnIcon}
           tooltipText={'Add new column'}
         />
-        <SmallGoldiButton
+        <MediumGoldiButton
           active={true}
           onClick={() => createEmptyItem(props.project)}
           icon={addRowIcon}

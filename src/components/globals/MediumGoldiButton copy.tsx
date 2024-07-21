@@ -1,14 +1,14 @@
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import '../../css/goldi-btn.css';
 
-type SmallGoldiButtonProps = {
+type MediumGoldiButtonProps = {
   active: boolean;
   onClick: () => void;
   icon: string;
   tooltipText: string;
 }
 
-export default function SmallGoldiButton(props: SmallGoldiButtonProps) {
+export default function MediumGoldiButton(props: MediumGoldiButtonProps) {
 
   const tooltip: JSX.Element = (
     <Tooltip id="tooltip">
@@ -23,7 +23,7 @@ export default function SmallGoldiButton(props: SmallGoldiButtonProps) {
         alt="?"
         onClick={props.onClick}
         className={props.active ? "active" : "inactive"}
-        width={"20px"}
+        width={"30px"}
       />
     </OverlayTrigger>
   );
