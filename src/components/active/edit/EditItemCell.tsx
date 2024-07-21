@@ -45,13 +45,15 @@ export default function EditItemCell(props: EditItemCellProps) {
           value={cellValue}
           onChange={e => setCellValue(e.target.value as unknown as number)}
           onKeyDown={e => {
-            console.log(e.key);
             if (e.key === "Enter" || e.key === "Tab") {
               update();
             }
+            if (e.key === "Escape") {
+              cancel();
+            }
           }}
           autoFocus
-          step={props.column.type === GoldiColumnType.Float ? "0.01" : "1"}
+          step={props.column.type === GoldiColumnType.Float ? "0.001" : "1"}
         />
       </div>
     )
@@ -63,7 +65,8 @@ export default function EditItemCell(props: EditItemCellProps) {
       onClick={() => setUserWantsToEdit(true)}
       style={{
         minHeight: '1.5em',
-        border: 'none'
+        border: 'none',
+        textAlign: 'left'
       }}
     >
       {cellValue}
@@ -73,6 +76,15 @@ export default function EditItemCell(props: EditItemCellProps) {
   async function update() {
     if (cellValue && (!itemToValueAssignment || itemToValueAssignment.value !== cellValue)) {
       await updateValue(props.project, props.item, props.column, cellValue);
+    }
+    setUserWantsToEdit(false)
+  }
+
+  function cancel() {
+    if (itemToValueAssignment) {
+      setCellValue(itemToValueAssignment.value);
+    } else {
+      setCellValue(undefined);
     }
     setUserWantsToEdit(false)
   }
