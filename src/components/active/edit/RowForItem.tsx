@@ -1,3 +1,4 @@
+import { Stack } from 'react-bootstrap';
 import { GoldiColumnType, GoldiValue } from '../../../db/projectData';
 import { InMemoryItem } from '../view/GoldiView';
 
@@ -20,13 +21,20 @@ export default function RowForItem(props: RowForItemProps) {
           }
           {
             (cell.column.type === GoldiColumnType.List) &&
-            <ul>
-              {(cell.values as unknown as GoldiValue[]).map((gv) => (
-                <li>
-                  {gv.value}
-                </li>
+            <Stack gap={1}>
+              {(cell.values as unknown as GoldiValue[]).map((v) => (
+                <span
+                  className='px-1 rounded'
+                  style={{
+                    color: v.color,
+                    backgroundColor: v.bgColor,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {v.value}
+                </span>
               ))}
-            </ul>
+            </Stack>
           }
         </td>
       ))}

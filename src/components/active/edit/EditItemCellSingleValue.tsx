@@ -1,22 +1,18 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { useEffect, useRef, useState } from "react";
-import { Button, Form, InputGroup, Stack, Table } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Form } from "react-bootstrap";
 import { Project } from "../../../db/appData";
-import { GoldiColumn, GoldiColumnType, GoldiItem, ItemToValueAssignment, ItemToValueMapping, ProjectDataRepository, projectDataRepository } from "../../../db/projectData";
-import SmallGoldiButton from "../../globals/SmallGoldiButton";
-import editIcon from '../../../icons/edit.png';
+import { GoldiColumn, GoldiColumnType, GoldiItem, ProjectDataRepository, projectDataRepository } from "../../../db/projectData";
 import { updateValue } from "../../../logic/items/itemsToValueAssignmentService";
 import { useOutsideClick } from "../../../logic/outsideClick";
 
-type EditItemCellProps = {
+type EditItemCellSingleValueProps = {
   project: Project;
   column: GoldiColumn;
   item: GoldiItem;
-  onLock: () => void;
-  onRelease: () => void;
 }
 
-export default function EditItemCell(props: EditItemCellProps) {
+export default function EditItemCellSingleValue(props: EditItemCellSingleValueProps) {
 
   const db: ProjectDataRepository = projectDataRepository(props.project.id);
 

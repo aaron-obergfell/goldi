@@ -2,7 +2,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import { Accordion, Col, Container, Row, Stack, Table } from "react-bootstrap";
 import { Project } from "../../../db/appData";
-import { GoldiColumn, ProjectDataRepository, projectDataRepository } from "../../../db/projectData";
+import { GoldiColumn, GoldiColumnType, ProjectDataRepository, projectDataRepository } from "../../../db/projectData";
 import { GoldiMeta } from "../../../types/goldi";
 import { InMemoryItem } from "../view/GoldiView";
 import RowForItem from "./RowForItem";
@@ -14,7 +14,9 @@ import rightIcon from '../../../icons/right.png';
 import { deleteColumn, moveLeft, moveRight } from "../../../logic/columns/columnsService";
 import ChangeColumnNameModal from "./ChangeColumnNameModal";
 import ColumnDeleteConfirmationModal from "./ColumnDeleteConfirmationModal";
-import EditItemCell from "./EditItemCell";
+import EditItemCellSingleValue from "./EditItemCellSingleValue";
+import EditItemCellValueList from "./EditItemCellValueList";
+import AddValueModal from "./AddValueModal";
 
 type EditGoldiTableProps = {
   project: Project;
@@ -30,6 +32,7 @@ export default function EditGoldiTable(props: EditGoldiTableProps) {
 
   const [columnToChange, setColumnToChange] = useState<GoldiColumn | undefined>(undefined);
   const [columnToDelete, setColumnToDelete] = useState<GoldiColumn | undefined>(undefined);
+  const [columnForNewValue, setColumnForNewValue] = useState<GoldiColumn | undefined>(undefined);
 
   return (
     <>
@@ -44,6 +47,12 @@ export default function EditGoldiTable(props: EditGoldiTableProps) {
           project={props.project}
           column={columnToDelete}
           onFinish={() => setColumnToDelete(undefined)} />
+      }
+      {columnForNewValue &&
+        <AddValueModal
+          project={props.project}
+          column={columnForNewValue}
+          onFinish={() => setColumnForNewValue(undefined)} />
       }
       <Table bordered responsive>
         <thead>
@@ -104,13 +113,22 @@ export default function EditGoldiTable(props: EditGoldiTableProps) {
               </td>
               {columns?.map((column) => (
                 <td key={`cell_${item.id}_${column.id}`}>
-                  <EditItemCell
-                    project={props.project}
-                    column={column}
-                    item={item}
-                    onLock={() => alert('lock')}
-                    onRelease={() => alert('release')}
-                  />
+                  {
+                    (column.type === GoldiColumnType.List) ? (
+                      <EditItemCellValueList
+                        project={props.project}
+                        column={column}
+                        item={item}
+                        onNewValue={() => setColumnForNewValue(column)}
+                        updateOnOutsideClick={!columnForNewValue}
+                      />
+                    ) : (
+                      <EditItemCellSingleValue
+                        project={props.project}
+                        column={column}
+                        item={item}
+                      />
+                    )}
                 </td>
               ))}
             </tr>
