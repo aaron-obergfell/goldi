@@ -2,6 +2,7 @@ import { log } from 'console';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState, useEffect } from 'react';
 import { Table } from 'react-bootstrap';
+import { useCurrentProjectDB } from '../../../Contexts';
 import { GoldiColumn, GoldiColumnType, GoldiItem, GoldiValue, ItemToValueAssignment, ProjectDataRepository, projectDataRepository } from '../../../db/projectData';
 import { GoldiMeta } from '../../../types/goldi.js';
 import GoldiColorBar from '../../globals/GoldiColorBar';
@@ -24,7 +25,7 @@ type InMemoryCell = {
 
 export default function GoldiView(props: GoldiViewProps) {
 
-  const db: ProjectDataRepository = projectDataRepository(props.projectId);
+  const db: ProjectDataRepository = useCurrentProjectDB();
 
   const [inMemoryItems, setInMemoryItems] = useState<InMemoryItem[]>([]);
 

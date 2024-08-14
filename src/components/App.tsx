@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { DBContext } from '../Contexts';
+import { ProjectDataRepository } from '../db/projectData';
 import ActiveGoldi from './active/ActiveGoldi';
 import InactiveGoldi from './inactive/InactiveGoldi';
 
@@ -15,10 +17,12 @@ function App() {
 
 
   return projectId ? (
-    <ActiveGoldi
-      projectId={projectId}
-      onClose={() => setProjectId(undefined)}
-    />
+    <DBContext.Provider value={new ProjectDataRepository(projectId)}>
+      <ActiveGoldi
+        projectId={projectId}
+        onClose={() => setProjectId(undefined)}
+      />
+    </DBContext.Provider>
   ) : (
     <InactiveGoldi setProjectId={setProjectId} />
   );
